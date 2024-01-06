@@ -11,7 +11,7 @@ import com.example.madcamp_week2_kjy_peb.databinding.UserItemBinding
 class Adapter: ListAdapter<User, Adapter.ViewHolder>(diffUtil) {
     inner class ViewHolder(private val binding: UserItemBinding): RecyclerView.ViewHolder(binding.root){
         fun bind(user: User){
-            binding.idTextView.text = user.id
+            binding.idTextView.text = user.users_id
         }
     }
 
