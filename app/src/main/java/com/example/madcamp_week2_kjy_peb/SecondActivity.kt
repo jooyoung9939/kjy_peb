@@ -13,6 +13,7 @@ import com.example.madcamp_week2_kjy_peb.databinding.ActivitySecondBinding // ì¶
 class SecondActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySecondBinding
     private lateinit var token: String
+
     val api = RetroInterface.create()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,5 +62,6 @@ class SecondActivity : AppCompatActivity() {
             .create()
 
         dialog.show()
+
     }
 }

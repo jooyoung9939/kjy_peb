@@ -1,5 +1,6 @@
 package com.example.madcamp_week2_kjy_peb
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -14,6 +15,7 @@ class Adapter: ListAdapter<User, Adapter.ViewHolder>(diffUtil) {
             binding.idTextView.text = user.users_id
         }
     }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(UserItemBinding.inflate(LayoutInflater.from(parent.context),parent,false))
