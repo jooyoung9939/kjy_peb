@@ -43,10 +43,10 @@ app.post('/register', (req, res) =>{
     const id = body.id;
     const pw = body.pw;
   
-    connection.query('select * from user where id=?',[id],(err,data)=>{
+    connection.query('select * from users where users_id=?',[id],(err,data)=>{
       if(data.length == 0){
           console.log('회원가입 성공');
-          connection.query('insert into user(id, password) values(?,?)',[id,pw]);
+          connection.query('insert into users(users_id, users_pw) values(?,?)',[id,pw]);
           res.status(200).json(
             {
               "message" : true
@@ -70,7 +70,7 @@ app.post('/login', (req, res)=>{
     const id = body.id;
     const pw = body.pw;
   
-    connection.query('select id, password from user where id=? and password=?', [id,pw], (err, data)=>{
+    connection.query('select users_id, users_pw from users where users_id=? and users_pw=?', [id,pw], (err, data)=>{
       if(data.length == 0){ // 로그인 실패
         console.log('로그인 실패');
         res.status(200).json(
@@ -82,7 +82,7 @@ app.post('/login', (req, res)=>{
       else{
         // 로그인 성공
         console.log('로그인 성공');
-        connection.query('select UID from user where id=?',[id],(err,data)=>{
+        connection.query('select UID from users where users_id=?',[id],(err,data)=>{
           res.status(200).send(data[0]);
         });
   
@@ -92,7 +92,7 @@ app.post('/login', (req, res)=>{
   });
 
 app.get('/users_info', (req, res) => {
-    connection.query('SELECT * FROM user', (error, rows) => {
+    connection.query('SELECT * FROM users', (error, rows) => {
       if(error) throw error;
       console.log('user info is : ', rows);
   
