@@ -16,10 +16,13 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".Register"
+            android:exported="false" />
+        <activity
             android:name=".Login"
             android:exported="false" />
-        <activity android:name=".SecondActivity"/>
-        <activity android:name=".AllUserActivity"/>
+        <activity android:name=".SecondActivity" />
+        <activity android:name=".AllUserActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
