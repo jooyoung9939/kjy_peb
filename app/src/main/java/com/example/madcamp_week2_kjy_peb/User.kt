@@ -22,7 +22,8 @@ data class LoginModel(
 )
 
 data class LoginResult(
-    var UID: Int
+    var UID: Int,
+    var accessToken: String
 )
 
 data class User(

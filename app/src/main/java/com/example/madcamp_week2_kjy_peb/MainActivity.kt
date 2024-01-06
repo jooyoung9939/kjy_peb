@@ -34,28 +34,36 @@ class MainActivity : AppCompatActivity() {
             }
 
             val loginUser = LoginModel(binding.inputID.text.toString(), binding.inputPw.text.toString())
-            api.login(loginUser).enqueue(object: Callback<LoginResult>{
+            api.login(loginUser).enqueue(object : Callback<LoginResult> {
                 override fun onResponse(call: Call<LoginResult>, response: Response<LoginResult>) {
                     val user_uid = response.body()?.UID ?: return
-                    if(user_uid != -1) {
+                    if (user_uid != -1) {
+                        // 로그인 성공 시, 서버에서 반환한 accessToken을 추출
+                        val token = response.body()?.accessToken ?: ""
                         Toast.makeText(applicationContext, "로그인 성공", Toast.LENGTH_SHORT).show()
+
+                        // SecondActivity로 이동
                         val intent = Intent(this@MainActivity, SecondActivity::class.java)
                         intent.putExtra("id", binding.inputID.text.toString())
-                        intent.putExtra("UID", user_uid)
+                        intent.putExtra("token", token)
+
                         startActivity(intent)
 
                         Log.d("testt", user_uid.toString())
+                    } else {
+                        Toast.makeText(
+                            applicationContext,
+                            "로그인 실패, 아이디 또는 비밀번호를 확인해주세요.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-                    else{
-                        Toast.makeText(applicationContext, "로그인 실패, 아이디 또는 비밀번호를 확인해주세요.", Toast.LENGTH_SHORT).show()
-                    }
-
                 }
 
                 override fun onFailure(call: Call<LoginResult>, t: Throwable) {
                     Log.d("testt", t.message.toString())
                 }
             })
+
         }
         binding.allUserButton.setOnClickListener {
             val intent = Intent(this@MainActivity, AllUserActivity::class.java)
