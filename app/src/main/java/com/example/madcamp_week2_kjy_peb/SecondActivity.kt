@@ -57,7 +57,7 @@ class SecondActivity : AppCompatActivity() {
     private fun showUserInfoDialog(userInfo: User) {
         val dialog = AlertDialog.Builder(this)
             .setTitle("사용자 정보")
-            .setMessage("ID: ${userInfo.users_id}\nPW: ${userInfo.users_id}\nUID: ${userInfo.UID}")
+            .setMessage("ID: ${userInfo.users_id}\nPW: ${userInfo.users_pw}\nUID: ${userInfo.UID}")
             .setPositiveButton("확인", null)
             .create()
 

@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql2');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const app = express();
 const port = 3000;
@@ -37,24 +38,40 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({extended: true }));
 app.use(bodyParser.json());
 
-const secretKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Imdlb3JnZTAzMDkiLCJpYXQiOjE3MDQ1MzE0NzAsImV4cCI6MTcwNDUzNTA3MH0.d32w6gmjba0j2Mzm-8GMCl2H2QHEENMghhMPSqzcGOA'; // 안전한 방식으로 보관하세요
+function generateRandomKey(length) {
+  return crypto.randomBytes(length).toString('hex');
+}
+
+// 예시: 길이가 32인 랜덤 시크릿 키 생성
+const secretKey = generateRandomKey(32);
+console.log('Random Secret Key:', secretKey);
 
 // 토큰 검증 미들웨어
 function authenticateToken(req, res, next) {
-  const token = req.header('Authorization');
-  if (!token) {
-  console.error('No token provided.');
-  return res.status(401).json({ message: 'Access denied. Token not provided.' });
+  const authHeader = req.header('Authorization');
+  console.log(authHeader);
+
+  if (!authHeader) {
+    console.error('No token provided.');
+    return res.status(401).json({ message: 'Access denied. Token not provided.' });
   }
 
+  const token = authHeader.split(' ')[1]; // "Bearer " 제거
+  console.log(token);
+
   jwt.verify(token, secretKey, (err, user) => {
-      if (err) {
-        console.error('Token verification failed:', err);
-        return res.status(403).json({ message: 'Invalid token.' });
-    }
+    if (err) {
+      const decoded = jwt.decode(token);
+      console.log('Decoded token:', decoded);
+      console.error('Token verification failed:', err);
+      return res.status(403).json({ message: 'Invalid token.' });
+    } else {
+      const decoded = jwt.decode(token);
+      console.log('Decoded token:', decoded);
 
       req.user = user;
       next();
+    }
   });
 }
 
@@ -158,8 +175,8 @@ app.get('/users_info', (req, res) => {
             // 사용자 정보를 클라이언트에게 반환
             const userInfo = {
               UID: results[0].UID,
-              id: results[0].users_id,
-              pw: results[0].users_pw
+              users_id: results[0].users_id,
+              users_pw: results[0].users_pw
                 // 기타 사용자 정보 필드들을 추가
             };
             res.json(userInfo);
