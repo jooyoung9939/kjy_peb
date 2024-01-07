@@ -13,6 +13,8 @@ import com.example.madcamp_week2_kjy_peb.databinding.ActivitySecondBinding // �
 class SecondActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySecondBinding
     private lateinit var token: String
+    private lateinit var userId: String
+    private lateinit var googleId: String
 
     val api = RetroInterface.create()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,10 +23,14 @@ class SecondActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val intent = intent
-        val id = intent.getStringExtra("id")
+        userId = intent.getStringExtra("id") ?: ""
+        googleId = intent.getStringExtra("googleId") ?: ""
 
-        token = intent.getStringExtra("token") ?: ""
-        binding.textView.text = "$id 님 안녕하세요."
+        if (googleId.isNotEmpty()) {
+            binding.textView.text = "$googleId 님 안녕하세요."
+        } else {
+            binding.textView.text = "$userId 님 안녕하세요."
+        }
 
         binding.myInfoButton.setOnClickListener {
             // 토큰을 이용하여 사용자 정보를 요청

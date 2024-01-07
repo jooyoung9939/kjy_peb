@@ -46,6 +46,9 @@ function generateRandomKey(length) {
 const secretKey = generateRandomKey(32);
 console.log('Random Secret Key:', secretKey);
 
+const CLIENT_ID = '648978352693-anm2jkrauoa94q7vp7h338mdcm97vp7s.apps.googleusercontent.com';
+
+
 // 토큰 검증 미들웨어
 function authenticateToken(req, res, next) {
   const authHeader = req.header('Authorization');
@@ -183,6 +186,36 @@ app.get('/users_info', (req, res) => {
         }
     });
 });
+
+// ...
+
+app.post('/google_login', (req, res) => {
+  const { idToken } = req.body;
+
+  console.log(idToken)
+
+  // TODO: 서버에서 idToken 검증 및 사용자 정보 확인 로직 추가
+  // 여기에 서버에서 idToken을 검증하고 사용자 정보를 확인하는 코드를 작성하면 됩니다.
+  // 예시: 토큰 검증이 성공하면 유저 정보를 응답으로 보냄
+
+  // Verify Google ID Token
+  client.verifyIdToken({
+      idToken: idToken,
+      audience: CLIENT_ID
+  }).then(ticket => {
+      const payload = ticket.getPayload();
+      const userId = payload['sub'];
+      const userInfo = {
+          id: userId,
+          // 여기에 사용자 정보 추가
+      };
+      res.status(200).json({ message: 'Google login successful', userInfo: userInfo });
+  }).catch(error => {
+      console.error('Google login failed:', error);
+      res.status(401).json({ message: 'Google login failed' });
+  });
+});
+
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

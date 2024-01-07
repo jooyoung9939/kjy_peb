@@ -40,4 +40,10 @@
         android:layout_height="wrap_content"
         android:text="All Users"/>
 
+    <!-- Google Sign-In Button -->
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/googleSignInButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
 </LinearLayout>
