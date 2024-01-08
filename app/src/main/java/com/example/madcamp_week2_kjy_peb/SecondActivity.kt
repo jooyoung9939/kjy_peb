@@ -5,11 +5,14 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.madcamp_week2_kjy_peb.databinding.ActivitySecondBinding
 
 import retrofit2.Call
 import retrofit2.Callback
@@ -32,7 +35,7 @@ class SecondActivity : AppCompatActivity() {
         val id = intent.getStringExtra("id")
 
         token = intent.getStringExtra("token") ?: ""
-        binding.textView.text = "$id 님 안녕하세요."
+        binding.textView.text = "$id 님,"
 
         binding.myInfoButton.setOnClickListener {
             // 토큰을 이용하여 사용자 정보를 요청
