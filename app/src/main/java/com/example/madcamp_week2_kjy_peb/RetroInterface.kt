@@ -15,6 +15,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface RetroInterface{
     @POST("/register")
@@ -31,6 +32,11 @@ interface RetroInterface{
 
     @GET("/users_info")
     fun allUser(): Call<ArrayList<User>>
+
+    @GET("/matched_users_info")
+    fun matchedUser(@Query("mbti") mbti: Int,
+                    @Query("hobby") hobby: Int,
+                    @Query("region") region: Int): Call<ArrayList<User>>
 
     @GET("/my_info")
     fun getMyInfo(@Header("Authorization") token: String): Call<User>

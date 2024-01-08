@@ -16,7 +16,6 @@ import androidx.core.graphics.drawable.toBitmap
 import com.example.madcamp_week2_kjy_peb.databinding.ActivityRegisterBinding
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
-
 import java.io.InputStream
 
 class Register : AppCompatActivity() {

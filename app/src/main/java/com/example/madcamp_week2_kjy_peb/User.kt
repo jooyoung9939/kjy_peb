@@ -9,6 +9,7 @@ data class RegisterModel(
     var mbti: Int,
     var hobby: Int,
     var region: Int
+
 )
 
 
