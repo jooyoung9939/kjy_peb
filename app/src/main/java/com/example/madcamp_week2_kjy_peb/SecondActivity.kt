@@ -13,9 +13,6 @@ import com.example.madcamp_week2_kjy_peb.databinding.ActivitySecondBinding // �
 class SecondActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySecondBinding
     private lateinit var token: String
-    private lateinit var userId: String
-    private lateinit var googleId: String
-
     val api = RetroInterface.create()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,14 +20,10 @@ class SecondActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val intent = intent
-        userId = intent.getStringExtra("id") ?: ""
-        googleId = intent.getStringExtra("googleId") ?: ""
+        val id = intent.getStringExtra("id")
 
-        if (googleId.isNotEmpty()) {
-            binding.textView.text = "$googleId 님 안녕하세요."
-        } else {
-            binding.textView.text = "$userId 님 안녕하세요."
-        }
+        token = intent.getStringExtra("token") ?: ""
+        binding.textView.text = "$id 님 안녕하세요."
 
         binding.myInfoButton.setOnClickListener {
             // 토큰을 이용하여 사용자 정보를 요청
@@ -63,11 +56,10 @@ class SecondActivity : AppCompatActivity() {
     private fun showUserInfoDialog(userInfo: User) {
         val dialog = AlertDialog.Builder(this)
             .setTitle("사용자 정보")
-            .setMessage("ID: ${userInfo.users_id}\nPW: ${userInfo.users_pw}\nUID: ${userInfo.UID}")
+            .setMessage("ID: ${userInfo.users_id}\nPW: ${userInfo.users_pw}\nUID: ${userInfo.UID}\nMBTI: ${userInfo.users_mbti}\nHOBBY: ${userInfo.users_hobby}\nREGION: ${userInfo.users_region}")
             .setPositiveButton("확인", null)
             .create()
 
         dialog.show()
-
     }
 }
