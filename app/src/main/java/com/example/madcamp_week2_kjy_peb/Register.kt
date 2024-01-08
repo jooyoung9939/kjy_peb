@@ -11,6 +11,7 @@ import java.io.File
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.util.Base64
+import android.view.View
 import android.widget.ArrayAdapter
 import androidx.core.graphics.drawable.toBitmap
 import com.example.madcamp_week2_kjy_peb.databinding.ActivityRegisterBinding
@@ -174,6 +175,7 @@ class Register : AppCompatActivity() {
             val imageBitmap: android.graphics.Bitmap = BitmapFactory.decodeStream(instream)
             instream?.close()
             binding.img.setImageBitmap(imageBitmap)
+            binding.insert.visibility = View.INVISIBLE
         }
     }
 
