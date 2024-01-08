@@ -1,23 +1,27 @@
 package com.example.madcamp_week2_kjy_peb
 
+import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import retrofit2.Call
 import retrofit2.Response
-
+import java.io.File
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.util.Base64
 import android.widget.ArrayAdapter
+import androidx.core.graphics.drawable.toBitmap
 import com.example.madcamp_week2_kjy_peb.databinding.ActivityRegisterBinding
 import java.io.ByteArrayOutputStream
+import java.io.FileOutputStream
 import java.io.InputStream
 
 class Register : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
     val api = RetroInterface.create()
-    var imageString: String = ""
+    var img_name: String = "osz.png"
 
     private val mbtiOptions = arrayOf("mbti 선택", "ESTJ", "ESTP", "ESFJ", "ESFP", "ENTJ", "ENTP", "ENFJ", "ENFP", "ISTJ", "ISTP", "ISFJ", "ISFP", "INTJ", "INTP", "INFJ", "INFP")
     private val hobbyOptions = arrayOf("취미 선택", "게임", "독서", "댄스", "등산", "만화/애니메이션 감상", "미술/그림 그리기", "악기 연주", "음악 감상", "여행", "영화 감상", "요리", "보드 게임", "산책", "스포츠 관람", "프로그래밍/코딩", "헬스/운동")
@@ -63,8 +67,21 @@ class Register : AppCompatActivity() {
                 api.register(newUser).enqueue(object: retrofit2.Callback<RegisterResult>{
                     override fun onResponse(call: Call<RegisterResult>, response: Response<RegisterResult>) {
                         val result = response.body()?.message ?: return
-                        if(result)
+                        if(result) {
+                            val tempFile = File(cacheDir, img_name+binding.inputID.text.toString())
+                            try {
+                                tempFile.createNewFile()
+                                val out = FileOutputStream(tempFile)
+                                val drawable: Drawable? = binding.img.drawable
+                                val bitmap: Bitmap? = drawable?.toBitmap()
+                                bitmap?.compress(Bitmap.CompressFormat.PNG, 100, out)
+                                out.close()
+                                Toast.makeText(applicationContext, "파일 저장 성공", Toast.LENGTH_SHORT).show()
+                            } catch (e: Exception) {
+                                Toast.makeText(applicationContext, "파일 저장 실패", Toast.LENGTH_SHORT).show()
+                            }
                             Toast.makeText(applicationContext, "회원가입 성공", Toast.LENGTH_SHORT).show()
+                        }
                         else
                             Toast.makeText(applicationContext, "회원가입 실패, 이미 존재하는 아이디 입니다.", Toast.LENGTH_SHORT).show()
                     }
@@ -157,10 +174,6 @@ class Register : AppCompatActivity() {
             val imageBitmap: android.graphics.Bitmap = BitmapFactory.decodeStream(instream)
             instream?.close()
             binding.img.setImageBitmap(imageBitmap)
-            val baos = ByteArrayOutputStream()
-            imageBitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 50, baos)
-            val bytes: ByteArray = baos.toByteArray()
-            imageString = Base64.encodeToString(bytes, Base64.DEFAULT)
         }
     }
 

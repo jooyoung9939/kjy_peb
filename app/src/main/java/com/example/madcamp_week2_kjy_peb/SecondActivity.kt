@@ -1,6 +1,8 @@
 package com.example.madcamp_week2_kjy_peb
 
 import android.app.AlertDialog
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.widget.ArrayAdapter
@@ -8,10 +10,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import com.example.madcamp_week2_kjy_peb.databinding.ActivitySecondBinding // 추가된 import
 
 class SecondActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySecondBinding
@@ -36,6 +38,7 @@ class SecondActivity : AppCompatActivity() {
             // 토큰을 이용하여 사용자 정보를 요청
             getUserInfo()
         }
+
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mbtiOptions)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -91,8 +94,18 @@ class SecondActivity : AppCompatActivity() {
     }
 
     private fun showUserInfoDialog(userInfo: User) {
+        val dialogView: View = View.inflate(this, R.layout.profile_image, null)
+        val ivPic: ImageView = dialogView.findViewById(R.id.imaged)
+        try{
+            val imgpath = cacheDir.toString()+"/"+"osz.png${userInfo.users_id}"
+            val bm: Bitmap = BitmapFactory.decodeFile(imgpath)
+            ivPic.setImageBitmap(bm)
+        } catch (e: Exception) {
+            Toast.makeText(applicationContext, "파일 로드 실패", Toast.LENGTH_SHORT).show()
+        }
         val dialog = AlertDialog.Builder(this)
             .setTitle("사용자 정보")
+            .setView(dialogView)
             .setMessage("ID: ${userInfo.users_id}\nPW: ${userInfo.users_pw}\nUID: ${userInfo.UID}\nMBTI: ${userInfo.users_mbti}\nHOBBY: ${userInfo.users_hobby}\nREGION: ${userInfo.users_region}")
             .setPositiveButton("확인", null)
             .create()
