@@ -12,7 +12,7 @@ import android.util.Base64
 import android.widget.ArrayAdapter
 import com.example.madcamp_week2_kjy_peb.databinding.ActivityRegisterBinding
 import java.io.ByteArrayOutputStream
-import java.io.InputStreamㅁㅇ니
+import java.io.InputStream
 
 class Register : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
