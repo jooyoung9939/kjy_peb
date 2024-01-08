@@ -46,7 +46,9 @@ function generateRandomKey(length) {
 const secretKey = generateRandomKey(32);
 console.log('Random Secret Key:', secretKey);
 
+const { OAuth2Client } = require('google-auth-library');
 const CLIENT_ID = '648978352693-anm2jkrauoa94q7vp7h338mdcm97vp7s.apps.googleusercontent.com';
+const client = new OAuth2Client(CLIENT_ID);
 
 
 // 토큰 검증 미들웨어
@@ -86,12 +88,15 @@ app.get('/', (req, res) => {
     const body = req.body;
     const id = body.id;
     const pw = body.pw;
+    const mbti = body.mbti;
+    const hobby = body.hobby;
+    const region = body.region;
     const image = body.image;
-  
+
     connection.query('select * from users where users_id=?',[id],(err,data)=>{
       if(data.length == 0){
           console.log('회원가입 성공');
-          connection.query('insert into users(users_id, users_pw, image) values(?,?,?)',[id,pw,image]);
+          connection.query('insert into users(users_id, users_pw, users_mbti_id, users_hobby_id, users_region_id, image) values(?,?,?,?,?,?)',[id,pw,mbti,hobby,region,image]);
           res.status(200).json(
             {
               "message" : true
@@ -149,6 +154,7 @@ app.post('/login', (req, res)=>{
   });
 
 app.get('/users_info', (req, res) => {
+
     connection.query('SELECT * FROM users', (error, rows) => {
       if(error) throw error;
       console.log('user info is : ', rows);
@@ -164,7 +170,25 @@ app.get('/users_info', (req, res) => {
     const userId = req.user.id;
 
     // 데이터베이스에서 사용자 정보 조회 (가정: users 테이블이 있다고 가정)
-    connection.query('SELECT * FROM users WHERE users_id = ?', [userId], (error, results) => {
+    const query = `
+        SELECT
+            u.UID,
+            u.users_id,
+            u.users_pw,
+            m.mbtis_name AS users_mbti,
+            h.hobbies_name AS users_hobby,
+            r.regions_name AS users_region
+        FROM
+            users u
+            LEFT JOIN mbtis m ON u.users_mbti_id = m.MID
+            LEFT JOIN hobbies h ON u.users_hobby_id = h.HID
+            LEFT JOIN regions r ON u.users_region_id = r.RID
+        WHERE
+            u.users_id = ?
+    `;
+
+    connection.query(query, [userId], (error, results) => {
+
         if (error) {
             console.error('Error fetching user information:', error);
             res.status(500).json({ error: 'Internal Server Error' });
@@ -179,9 +203,13 @@ app.get('/users_info', (req, res) => {
             const userInfo = {
               UID: results[0].UID,
               users_id: results[0].users_id,
-              users_pw: results[0].users_pw
+              users_pw: results[0].users_pw,
+              users_mbti: results[0].users_mbti,
+              users_hobby: results[0].users_hobby,
+              users_region: results[0].users_region
                 // 기타 사용자 정보 필드들을 추가
             };
+            console.log(userInfo);
             res.json(userInfo);
         }
     });

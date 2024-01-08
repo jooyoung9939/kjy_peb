@@ -22,6 +22,27 @@
         android:hint="Password"
         android:inputType="textPassword"/>
 
+    <Spinner
+        android:id="@+id/mbtiSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Select MBTI"/>
+
+    <Spinner
+        android:id="@+id/hobbySpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Select MBTI"/>
+
+    <Spinner
+        android:id="@+id/regionSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Select MBTI"/>
+
     <Button
         android:id="@+id/registerButton"
         android:layout_width="match_parent"
