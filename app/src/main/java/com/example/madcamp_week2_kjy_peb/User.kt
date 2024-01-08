@@ -27,6 +27,13 @@ data class LoginResult(
     var accessToken: String
 )
 
+data class ChatModel(
+    val name: String,
+    val script: String,
+    val profile_image:String,
+    val date_time:String
+)
+
 data class User(
     val UID: Int,
     val users_id: String,

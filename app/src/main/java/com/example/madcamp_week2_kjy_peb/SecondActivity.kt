@@ -1,6 +1,7 @@
 package com.example.madcamp_week2_kjy_peb
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -40,6 +41,10 @@ class SecondActivity : AppCompatActivity() {
         binding.myInfoButton.setOnClickListener {
             // 토큰을 이용하여 사용자 정보를 요청
             getUserInfo()
+        }
+        binding.chatting.setOnClickListener{
+            val intent = Intent(this@SecondActivity, ChatRoomActivity::class.java)
+            startActivity(intent)
         }
 
 
