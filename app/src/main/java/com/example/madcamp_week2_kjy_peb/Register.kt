@@ -12,7 +12,7 @@ import android.util.Base64
 import android.widget.ArrayAdapter
 import com.example.madcamp_week2_kjy_peb.databinding.ActivityRegisterBinding
 import java.io.ByteArrayOutputStream
-import java.io.InputStreamㅁㅇ니
+import java.io.InputStream
 
 class Register : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
@@ -59,7 +59,7 @@ class Register : AppCompatActivity() {
                 val selectedHobbyInt = convertHobbyStringToInt(selectedHobbyString)
                 val selectedRegionInt = convertRegionStringToInt(selectedRegionString)
 
-                val newUser = RegisterModel(binding.inputID.text.toString(), binding.inputPw.text.toString(), selectedMbtiInt, selectedHobbyInt, selectedRegionInt,imageString)
+                val newUser = RegisterModel(binding.inputID.text.toString(), binding.inputPw.text.toString(), selectedMbtiInt, selectedHobbyInt, selectedRegionInt)
                 api.register(newUser).enqueue(object: retrofit2.Callback<RegisterResult>{
                     override fun onResponse(call: Call<RegisterResult>, response: Response<RegisterResult>) {
                         val result = response.body()?.message ?: return

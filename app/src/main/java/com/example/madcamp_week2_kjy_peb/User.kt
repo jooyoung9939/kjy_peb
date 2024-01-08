@@ -11,7 +11,7 @@ data class RegisterModel(
     var mbti: Int,
     var hobby: Int,
     var region: Int,
-    var image: String
+//    var image: String
 )
 
 

@@ -18,20 +18,25 @@ const corsOptions = {
   // 라우팅 및 미들웨어 등을 여기에 추가
   app.use(cors(corsOptions));
 
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: '*ilove0309',
-  database: 'madcamp_week2'
+  database: 'madcamp_week2',
+  connectionLimit: 2,
+  waitForConnections: true,
+  queueLimit: 0,
+  keepAliveInitialDelay: 10000,
+  enableKeepAlive: true
 });
 
-connection.connect((err) => {
-  if (err) {
-    console.error('MySQL connection error:', err);
-  } else {
-    console.log('Connected to MySQL database');
-  }
-});
+// connection.connect((err) => {
+//   if (err) {
+//     console.error('MySQL connection error:', err);
+//   } else {
+//     console.log('Connected to MySQL database');
+//   }
+// });
 
 app.use(express.json());
 
@@ -91,12 +96,12 @@ app.get('/', (req, res) => {
     const mbti = body.mbti;
     const hobby = body.hobby;
     const region = body.region;
-    const image = body.image;
+    // const image = body.image;
 
     connection.query('select * from users where users_id=?',[id],(err,data)=>{
       if(data.length == 0){
           console.log('회원가입 성공');
-          connection.query('insert into users(users_id, users_pw, users_mbti_id, users_hobby_id, users_region_id, image) values(?,?,?,?,?,?)',[id,pw,mbti,hobby,region,image]);
+          connection.query('insert into users(users_id, users_pw, users_mbti_id, users_hobby_id, users_region_id) values(?,?,?,?,?)',[id,pw,mbti,hobby,region]);
           res.status(200).json(
             {
               "message" : true
@@ -163,6 +168,40 @@ app.get('/users_info', (req, res) => {
   
     });
   });
+
+  app.get('/matched_users_info', (req, res) => {
+    const mbti = req.query.mbti;
+    const hobby = req.query.hobby;
+    const region = req.query.region;
+
+    // 수정된 쿼리문
+    const query = `
+        SELECT
+            u.users_id,
+            m.mbtis_name AS users_mbti,
+            h.hobbies_name AS users_hobby,
+            r.regions_name AS users_region
+        FROM
+            users u
+            LEFT JOIN mbtis m ON u.users_mbti_id = m.MID
+            LEFT JOIN hobbies h ON u.users_hobby_id = h.HID
+            LEFT JOIN regions r ON u.users_region_id = r.RID
+        WHERE
+            u.users_mbti_id = ? or u.users_hobby_id = ? or u.users_region_id = ?
+    `;
+
+    connection.query(query, [mbti, hobby, region], (error, rows) => {
+        if (error) {
+            console.error('Error fetching matched users information:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        console.log('Matched user info is:', rows);
+        res.status(200).send(rows);
+    });
+});
+
 
   app.get('/my_info', authenticateToken, (req, res) => {
     console.log('Authorization Header:', req.header('Authorization'));
