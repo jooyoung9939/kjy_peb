@@ -2,6 +2,8 @@ package com.example.madcamp_week2_kjy_peb
 
 import android.content.Context
 import android.os.Bundle
+import android.text.TextUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,9 +11,18 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import io.socket.client.IO
+import io.socket.client.Socket
+import io.socket.emitter.Emitter
+import org.json.JSONException
+import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -20,11 +31,47 @@ class ChatRoomActivity : AppCompatActivity() {
     private lateinit var chating_Text: EditText
     private lateinit var chat_Send_Button: Button
     private lateinit var chat_recyclerview: RecyclerView
+    private lateinit var token: String
+    var users_id: String = ""
+    val api = RetroInterface.create()
+
+    private var hasConnection: Boolean = false
+    private var thread2: Thread? = null
+    private var startTyping = false
+    private var time = 2
+
+    private var mSocket: Socket = IO.socket("http://143.248.232.211:3000")
+
     var arrayList = arrayListOf<ChatModel>()
     val mAdapter: ChatAdapter = ChatAdapter(this, arrayList)
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat_room)
+
+        val intent = intent
+        token = intent.getStringExtra("token") ?: ""
+        api.getMyInfo("Bearer $token").enqueue(object : Callback<User> {
+            override fun onResponse(call: Call<User>, response: Response<User>) {
+                if (response.isSuccessful) {
+                    val userInfo = response.body()
+                    if (userInfo != null) {
+                        users_id = userInfo.users_id
+                        mAdapter.setUserId(users_id)
+                        mAdapter.notifyDataSetChanged()
+                    } else {
+                        Toast.makeText(applicationContext, "사용자 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(applicationContext, "사용자 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<User>, t: Throwable) {
+                Log.d("testt", t.message.toString())
+            }
+        })
 
         chat_recyclerview = findViewById(R.id.chat_recyclerview)
         chat_recyclerview.adapter = mAdapter
@@ -34,9 +81,83 @@ class ChatRoomActivity : AppCompatActivity() {
         chat_Send_Button = findViewById(R.id.chat_Send_Button)
         chating_Text = findViewById(R.id.chating_Text)
 
+        if(savedInstanceState != null){
+            hasConnection = savedInstanceState.getBoolean("hasConnection")
+        }
+        if(hasConnection){
+
+        } else{
+            mSocket.connect()
+            mSocket.on("connect user", onNewUser)
+            mSocket.on("chat message", onNewMessage)
+            mSocket.on(Socket.EVENT_CONNECT) {
+                Log.d("Socket", "Connected")
+            }
+
+            mSocket.on(Socket.EVENT_CONNECT_ERROR) { args ->
+                val e = args[0] as Exception
+                Log.e("Socket", "Connect error: ${e.message}")
+            }
+
+            val userId = JSONObject()
+            try{
+                userId.put("username", users_id+"Connected")
+                userId.put("roomName", "room_example")
+                Log.e("username", users_id+"Connected")
+
+                mSocket.emit("connect user", userId)
+            } catch (e: JSONException){
+                e.printStackTrace()
+            }
+
+        }
+
+        hasConnection = true
+
         chat_Send_Button.setOnClickListener{
             sendMessage()
         }
+    }
+
+    internal var onNewMessage: Emitter.Listener = Emitter.Listener { args ->
+        runOnUiThread(Runnable {
+            val data = args[0] as JSONObject
+            val name: String
+            val script: String
+            val profile_image: String
+            val date_time: String
+            try{
+                Log.e("asdasd", data.toString())
+                name = data.getString("name")
+                script = data.getString("script")
+                profile_image = data.getString("profile_image")
+                date_time = data.getString("date_time")
+                Log.e("ReceivedMessage", "Name: $name, Script: $script, Profile Image: $profile_image, Date Time: $date_time")
+                val format = ChatModel(name, script, profile_image, date_time)
+                mAdapter.addItem(format)
+                mAdapter.notifyDataSetChanged()
+                Log.e("new me", name)
+            } catch (e: Exception) {
+                return@Runnable
+            }
+        })
+    }
+
+    internal var onNewUser: Emitter.Listener = Emitter.Listener { args ->
+        runOnUiThread(Runnable {
+            val length = args.size
+
+            if(length == 0){
+                return@Runnable
+            }
+            var username = args[0].toString()
+            try{
+                val `object` = JSONObject(username)
+                username = `object`.getString("username")
+            } catch (e:JSONException){
+                e.printStackTrace()
+            }
+        })
     }
 
     fun sendMessage(){
@@ -44,15 +165,32 @@ class ChatRoomActivity : AppCompatActivity() {
         val date = Date(now)
         val sdf = SimpleDateFormat("yyyy-MM-dd")
         val getTime = sdf.format(date)
-        val item = ChatModel("users_id", chating_Text.text.toString(), "example", getTime)
-        mAdapter.addItem(item)
-        mAdapter.notifyDataSetChanged()
+        val message = chating_Text.text.toString().trim({it<=' '})
+        if(TextUtils.isEmpty(message)){
+            return
+        }
+        Log.d("ChatRoomActivity", "sendMessage: Message - $message")
         chating_Text.setText("")
+        val jsonObject = JSONObject()
+        try{
+            jsonObject.put("name", users_id)
+            jsonObject.put("script", message)
+            jsonObject.put("profile_image", "example")
+            jsonObject.put("date_time", getTime)
+            jsonObject.put("roomName", "room_example")
+        } catch (e:JSONException){
+            e.printStackTrace()
+        }
+        Log.e("챗룸", "sendMessage: Message sent")
+        mSocket.emit("chat message", jsonObject)
+        Log.e("sendmmm", users_id)
     }
     class ChatAdapter(val context: Context, val arrayList: ArrayList<ChatModel>):
         RecyclerView.Adapter<RecyclerView.ViewHolder> (){
-
-
+        private var users_id: String? = null
+        fun setUserId(users_id: String){
+            this.users_id = users_id
+        }
         fun addItem(item: ChatModel) {//아이템 추가
             if (arrayList != null) {
                 arrayList.add(item)
@@ -86,6 +224,7 @@ class ChatRoomActivity : AppCompatActivity() {
             }
             //onCreateViewHolder에서 리턴받은 뷰홀더가 Holder2라면 상대의 채팅, item_your_chat의 뷰들을 초기화 해줌
             else if(viewHolder is Holder2) {
+
                 (viewHolder as Holder2).chat_You_Image?.setImageResource(R.mipmap.ic_launcher)
                 (viewHolder as Holder2).chat_You_Name?.setText(arrayList.get(i).name)
                 (viewHolder as Holder2).chat_Text?.setText(arrayList.get(i).script)
@@ -116,7 +255,7 @@ class ChatRoomActivity : AppCompatActivity() {
         override fun getItemViewType(position: Int): Int {//여기서 뷰타입을 1, 2로 바꿔서 지정해줘야 내채팅 너채팅을 바꾸면서 쌓을 수 있음
 
             //내 아이디와 arraylist의 name이 같다면 내꺼 아니면 상대꺼
-            return if (arrayList.get(position).name == "users_id") {
+            return if (arrayList.get(position).name == users_id) {
                 1
             } else {
                 2

@@ -56,5 +56,5 @@ dependencies {
     implementation ("com.google.firebase:firebase-bom:32.0.0")
     implementation ("com.google.android.gms:play-services-auth:20.5.0")
     //Chattinh
-    implementation("com.github.nkzawa:socket.io-client:0.3.0")
+    implementation("io.socket:socket.io-client:2.1.0")
 }
