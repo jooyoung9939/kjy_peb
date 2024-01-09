@@ -1,21 +1,19 @@
 package com.example.madcamp_week2_kjy_peb
 
 import android.graphics.Bitmap
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.drawable.toBitmap
+import com.example.madcamp_week2_kjy_peb.databinding.ActivityRegisterBinding
 import retrofit2.Call
 import retrofit2.Response
 import java.io.File
-import android.graphics.BitmapFactory
-import android.graphics.drawable.Drawable
-import android.util.Base64
-import android.view.View
-import android.widget.ArrayAdapter
-import androidx.core.graphics.drawable.toBitmap
-import com.example.madcamp_week2_kjy_peb.databinding.ActivityRegisterBinding
-import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 
