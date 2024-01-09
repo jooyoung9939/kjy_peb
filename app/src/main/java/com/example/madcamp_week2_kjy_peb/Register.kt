@@ -99,7 +99,7 @@ class Register : AppCompatActivity() {
 
     private fun convertMbtiStringToInt(mbtiString: String): Int {
         return when (mbtiString) {
-            "mbti 선택" -> 0
+            "mbti 선택" -> 17
             "ESTJ" -> 1
             "ESTP" -> 2
             "ESFJ" -> 3
@@ -116,13 +116,13 @@ class Register : AppCompatActivity() {
             "INTP" -> 14
             "INFJ" -> 15
             "INFP" -> 16
-            else -> 0 // Default value or handle unknown MBTI options
+            else -> 17 // Default value or handle unknown MBTI options
         }
     }
 
     private fun convertHobbyStringToInt(hobbyString: String): Int {
         return when (hobbyString) {
-            "취미 선택" -> 0
+            "취미 선택" -> 17
             "게임" -> 1
             "독서" -> 2
             "댄스" -> 3
@@ -139,13 +139,13 @@ class Register : AppCompatActivity() {
             "스포츠 관람" -> 14
             "프로그래밍/코딩" -> 15
             "헬스/운동" -> 16
-            else -> 0 // Default value or handle unknown hobby options
+            else -> 17 // Default value or handle unknown hobby options
         }
     }
 
     private fun convertRegionStringToInt(regionString: String): Int {
         return when (regionString) {
-            "지역 선택" -> 0
+            "지역 선택" -> 18
             "서울특별시" -> 1
             "인천광역시" -> 2
             "부산광역시" -> 3
@@ -163,7 +163,7 @@ class Register : AppCompatActivity() {
             "강원도" -> 15
             "제주특별자치도" -> 16
             "세종특별자치도" -> 17
-            else -> 0 // Default value or handle unknown region options
+            else -> 18 // Default value or handle unknown region options
         }
     }
 
