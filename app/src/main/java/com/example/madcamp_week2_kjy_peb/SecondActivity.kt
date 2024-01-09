@@ -2,7 +2,6 @@ package com.example.madcamp_week2_kjy_peb
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
@@ -18,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.madcamp_week2_kjy_peb.databinding.ActivitySecondBinding
-
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -27,6 +25,8 @@ class SecondActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySecondBinding
     private lateinit var token: String
     val api = RetroInterface.create()
+    private lateinit var id: String
+
 
     private val mbtiOptions = arrayOf("mbti 선택", "ESTJ", "ESTP", "ESFJ", "ESFP", "ENTJ", "ENTP", "ENFJ", "ENFP", "ISTJ", "ISTP", "ISFJ", "ISFP", "INTJ", "INTP", "INFJ", "INFP")
     private val hobbyOptions = arrayOf("취미 선택", "게임", "독서", "댄스", "등산", "만화/애니메이션 감상", "미술/그림 그리기", "악기 연주", "음악 감상", "여행", "영화 감상", "요리", "보드 게임", "산책", "스포츠 관람", "프로그래밍/코딩", "헬스/운동")
@@ -37,7 +37,7 @@ class SecondActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val intent = intent
-        val id = intent.getStringExtra("id")
+        id = intent.getStringExtra("id")?: ""
 
         token = intent.getStringExtra("token") ?: ""
         binding.textView.text = "$id 님,"
@@ -46,12 +46,7 @@ class SecondActivity : AppCompatActivity() {
             // 토큰을 이용하여 사용자 정보를 요청
             getUserInfo()
         }
-        binding.chatting.setOnClickListener{
-            val intent = Intent(this@SecondActivity, ChatRoomActivity::class.java)
-            intent.putExtra("token", token)
-            intent.putExtra("user_id", id)
-            startActivity(intent)
-        }
+
 
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mbtiOptions)
@@ -109,6 +104,14 @@ class SecondActivity : AppCompatActivity() {
 
     private fun showUserInfoDialog(userInfo: User) {
         val dialogView: View = View.inflate(this, R.layout.profile_image, null)
+        val imaged: ImageView = dialogView.findViewById(R.id.imaged)
+        try {
+            var img_path: String = getCacheDir().toString() + "/" + "osz.png"+userInfo.users_id // 내부 저장소에 저장되어 있는 이미지 경로
+            var bm = BitmapFactory.decodeFile(img_path)
+            imaged.setImageBitmap(bm) // 내부 저장소에 저장된 이미지를 이미지뷰에 셋
+        } catch (e: java.lang.Exception) {
+            Toast.makeText(getApplicationContext(), "파일 로드 실패", Toast.LENGTH_SHORT).show()
+        }
         dialogView.layoutParams = ViewGroup.LayoutParams(
             resources.getDimensionPixelSize(R.dimen.profile_dialog_width),
             ViewGroup.LayoutParams.WRAP_CONTENT
@@ -146,6 +149,7 @@ class SecondActivity : AppCompatActivity() {
         val hobbySpinner: Spinner = editView.findViewById(R.id.editHobbySpinner)
         val regionSpinner: Spinner = editView.findViewById(R.id.editRegionSpinner)
 
+
         // Set up spinners with options
         val mbtiAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mbtiOptions)
         mbtiAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -180,6 +184,7 @@ class SecondActivity : AppCompatActivity() {
 
         editDialog.show()
     }
+
 
     private fun editMyInfo(newPassword: String, newMbti: Int, newHobby: Int, newRegion: Int) {
         val editModel = EditModel(newPassword, newMbti, newHobby, newRegion)
@@ -245,8 +250,22 @@ class SecondActivity : AppCompatActivity() {
         val recyclerView = dialogView.findViewById<RecyclerView>(R.id.matchedUsersRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this).also { it.orientation = LinearLayoutManager.HORIZONTAL  }
         val adapter = MatchedUsersAdapter(matchedUsers)
+        adapter.setOnButtonClickListener(object : MatchedUsersAdapter.OnButtonClickListener {
+            override fun onButtonClick(position: Int, userId: String) {
+                val intent = Intent(this@SecondActivity, ChatRoomActivity::class.java)
+                intent.putExtra("token", token)
+                var room: String
+                if(userId > id){
+                    room = userId+"_"+id
+                } else {
+                    room = id+"_"+userId
+                }
+                intent.putExtra("room", room)
+                Log.e("cjattasdf", "WJU - $room")
+                startActivity(intent)
+            }
+        })
         recyclerView.adapter = adapter
-
         // 다이얼로그 생성
         val dialog = AlertDialog.Builder(this)
             .setTitle("매칭된 사용자 목록")
@@ -259,7 +278,7 @@ class SecondActivity : AppCompatActivity() {
 
     private fun convertMbtiStringToInt(mbtiString: String): Int {
         return when (mbtiString) {
-            "mbti 선택" -> 0
+            "mbti 선택" -> 17
             "ESTJ" -> 1
             "ESTP" -> 2
             "ESFJ" -> 3
@@ -276,13 +295,13 @@ class SecondActivity : AppCompatActivity() {
             "INTP" -> 14
             "INFJ" -> 15
             "INFP" -> 16
-            else -> 0 // Default value or handle unknown MBTI options
+            else -> 17 // Default value or handle unknown MBTI options
         }
     }
 
     private fun convertHobbyStringToInt(hobbyString: String): Int {
         return when (hobbyString) {
-            "취미 선택" -> 0
+            "취미 선택" -> 17
             "게임" -> 1
             "독서" -> 2
             "댄스" -> 3
@@ -299,13 +318,13 @@ class SecondActivity : AppCompatActivity() {
             "스포츠 관람" -> 14
             "프로그래밍/코딩" -> 15
             "헬스/운동" -> 16
-            else -> 0 // Default value or handle unknown hobby options
+            else -> 17 // Default value or handle unknown hobby options
         }
     }
 
     private fun convertRegionStringToInt(regionString: String): Int {
         return when (regionString) {
-            "지역 선택" -> 0
+            "지역 선택" -> 18
             "서울특별시" -> 1
             "인천광역시" -> 2
             "부산광역시" -> 3
@@ -323,7 +342,7 @@ class SecondActivity : AppCompatActivity() {
             "강원도" -> 15
             "제주특별자치도" -> 16
             "세종특별자치도" -> 17
-            else -> 0 // Default value or handle unknown region options
+            else -> 18 // Default value or handle unknown region options
         }
     }
 }
