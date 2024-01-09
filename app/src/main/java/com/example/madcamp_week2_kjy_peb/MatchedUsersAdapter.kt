@@ -10,10 +10,10 @@ class MatchedUsersAdapter(private val matchedUsers: ArrayList<User>) :
     RecyclerView.Adapter<MatchedUsersAdapter.ViewHolder>() {
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val userIdTextView: TextView = itemView.findViewById(R.id.userIdTextView)
-        val mbtiTextView: TextView = itemView.findViewById(R.id.mbtiTextView)
-        val hobbyTextView: TextView = itemView.findViewById(R.id.hobbyTextView)
-        val regionTextView: TextView = itemView.findViewById(R.id.regionTextView)
+        val userIdTextView: TextView = itemView.findViewById(R.id.matchedUserIdTextView)
+        val mbtiTextView: TextView = itemView.findViewById(R.id.matchedMbtiTextView)
+        val hobbyTextView: TextView = itemView.findViewById(R.id.matchedHobbyTextView)
+        val regionTextView: TextView = itemView.findViewById(R.id.matchedRegionTextView)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
