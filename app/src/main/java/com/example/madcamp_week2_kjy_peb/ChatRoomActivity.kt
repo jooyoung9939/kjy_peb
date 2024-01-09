@@ -1,6 +1,7 @@
 package com.example.madcamp_week2_kjy_peb
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
@@ -32,6 +33,7 @@ class ChatRoomActivity : AppCompatActivity() {
     private lateinit var chat_Send_Button: Button
     private lateinit var chat_recyclerview: RecyclerView
     private lateinit var token: String
+    private lateinit var room: String
     var users_id: String = ""
     val api = RetroInterface.create()
 
@@ -50,8 +52,9 @@ class ChatRoomActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat_room)
 
-        val intent = intent
         token = intent.getStringExtra("token") ?: ""
+        room = intent.getStringExtra("room") ?: ""
+        Log.d("ChatRoomActivity", "onCreate: room - $room")
         api.getMyInfo("Bearer $token").enqueue(object : Callback<User> {
             override fun onResponse(call: Call<User>, response: Response<User>) {
                 if (response.isSuccessful) {
@@ -102,7 +105,7 @@ class ChatRoomActivity : AppCompatActivity() {
             val userId = JSONObject()
             try{
                 userId.put("username", users_id+"Connected")
-                userId.put("roomName", "room_example")
+                userId.put("roomName", room)
                 Log.e("username", users_id+"Connected")
 
                 mSocket.emit("connect user", userId)
@@ -171,13 +174,14 @@ class ChatRoomActivity : AppCompatActivity() {
         }
         Log.d("ChatRoomActivity", "sendMessage: Message - $message")
         chating_Text.setText("")
+        Log.d("ChatRoomActivity", "sendMessage: room - $room")
         val jsonObject = JSONObject()
         try{
             jsonObject.put("name", users_id)
             jsonObject.put("script", message)
             jsonObject.put("profile_image", "example")
             jsonObject.put("date_time", getTime)
-            jsonObject.put("roomName", "room_example")
+            jsonObject.put("roomName", room)
         } catch (e:JSONException){
             e.printStackTrace()
         }
@@ -224,8 +228,12 @@ class ChatRoomActivity : AppCompatActivity() {
             }
             //onCreateViewHolder에서 리턴받은 뷰홀더가 Holder2라면 상대의 채팅, item_your_chat의 뷰들을 초기화 해줌
             else if(viewHolder is Holder2) {
-
-                (viewHolder as Holder2).chat_You_Image?.setImageResource(R.mipmap.ic_launcher)
+                try {
+                    var img_path: String = context.cacheDir.absolutePath + "/" + "osz.png"+arrayList.get(i).name // 내부 저장소에 저장되어 있는 이미지 경로
+                    var bm = BitmapFactory.decodeFile(img_path)
+                    (viewHolder as Holder2).chat_You_Image?.setImageBitmap(bm) // 내부 저장소에 저장된 이미지를 이미지뷰에 셋
+                } catch (e: java.lang.Exception) {
+                }
                 (viewHolder as Holder2).chat_You_Name?.setText(arrayList.get(i).name)
                 (viewHolder as Holder2).chat_Text?.setText(arrayList.get(i).script)
                 (viewHolder as Holder2).chat_Time?.setText(arrayList.get(i).date_time)

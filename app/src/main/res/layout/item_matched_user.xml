@@ -8,7 +8,7 @@
     app:cardCornerRadius="16dp"
     app:cardElevation="4dp">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -24,6 +24,8 @@
             android:textStyle="bold"/>
 
         <View
+            android:id="@+id/hi"
+            android:layout_below="@id/matchedUserIdTextView"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#BDBDBD"
@@ -31,6 +33,7 @@
             android:layout_marginBottom="8dp"/>
 
         <TextView
+            android:layout_below="@id/hi"
             android:id="@+id/matchedMbtiTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -39,6 +42,7 @@
             android:textColor="#555555"/>
 
         <TextView
+            android:layout_below="@id/matchedMbtiTextView"
             android:id="@+id/matchedHobbyTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -47,12 +51,23 @@
             android:textColor="#555555"/>
 
         <TextView
+            android:layout_below="@id/matchedHobbyTextView"
             android:id="@+id/matchedRegionTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Region: "
             android:textSize="16sp"
             android:textColor="#555555"/>
-    </LinearLayout>
+
+        <Button
+            android:id="@+id/chat"
+            style="@style/AppTheme.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="16dp"
+            android:text="채팅하기" />
+    </RelativeLayout>
 </androidx.cardview.widget.CardView>
 
