@@ -4,9 +4,12 @@ const mysql = require('mysql2');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const http = require('http');
+const socketIO = require('socket.io');
+const path = require('path');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 const corsOptions = {
     origin: '*', // 모든 도메인에 대해 접근 허용
@@ -202,6 +205,31 @@ app.get('/users_info', (req, res) => {
     });
 });
 
+app.post('/edit_my_info', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const { newPassword, newMbti, newHobby, newRegion } = req.body;
+
+  // 여기서는 단순히 성공적으로 업데이트되었다고 가정합니다.
+  // 실제로는 DB 업데이트 로직을 추가해야 합니다.
+  // UPDATE 쿼리를 사용하여 사용자 정보를 업데이트하는 로직을 추가해야 합니다.
+  // 여기서는 가정상의 코드입니다.
+
+  connection.query('UPDATE users SET users_pw=?, users_mbti_id=?, users_hobby_id=?, users_region_id=? WHERE users_id=?', [newPassword, newMbti, newHobby, newRegion, userId], (err, data) => {
+      if (!err) {
+          console.log('사용자 정보 업데이트 성공');
+          res.status(200).json({
+              message: true
+          });
+      } else {
+          console.error('사용자 정보 업데이트 실패', err);
+          res.status(500).json({
+              message: false
+          });
+      }
+  });
+});
+
+
 
   app.get('/my_info', authenticateToken, (req, res) => {
     console.log('Authorization Header:', req.header('Authorization'));
@@ -284,8 +312,30 @@ app.post('/google_login', (req, res) => {
 });
 
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+const server = http.createServer(app);
+const io = socketIO(server);
+console.log("outside io");
+
+io.on('connection',  function(socket) {
+    // 소켓 연결 이벤트 처리
+    console.log('User Connection');
+
+    socket.on('connect user', function (user) {
+        console.log("Connected user ");
+        socket.join(user['roomName']);
+        console.log("roomName : ", user['roomName']);
+        console.log("state : ", socket.adapter.rooms);
+        io.emit('connect user', user);
+    });
+
+    socket.on('chat message', function (msg) {
+        console.log("Message " + msg['message']);
+        console.log("보내는 아이디 : ", msg['rommName']);
+        io.to(msg['roomName']).emit('chat message', msg);
+    });
 });
 
+server.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
 

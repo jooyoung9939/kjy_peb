@@ -41,6 +41,13 @@ interface RetroInterface{
     @GET("/my_info")
     fun getMyInfo(@Header("Authorization") token: String): Call<User>
 
+    @POST("/edit_my_info")
+    @Headers("accept: application/json", "content-type: application/json")
+    fun edit_my_info(
+        @Header("Authorization") token: String,
+        @Body jsonparams: EditModel
+    ): Call<EditResult>
+
     @POST("/google_login")
     @Headers("accept: application/json",
         "content-type: application/json")

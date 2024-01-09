@@ -42,3 +42,16 @@ data class User(
     val users_hobby: String,
     val users_region: String
 ): Serializable
+
+// User.kt
+
+data class EditModel(
+    val newPassword: String,
+    val newMbti: Int,
+    val newHobby: Int,
+    val newRegion: Int
+)
+
+data class EditResult(
+    var message: Boolean
+)

@@ -7,8 +7,12 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -105,23 +109,112 @@ class SecondActivity : AppCompatActivity() {
 
     private fun showUserInfoDialog(userInfo: User) {
         val dialogView: View = View.inflate(this, R.layout.profile_image, null)
-        val ivPic: ImageView = dialogView.findViewById(R.id.imaged)
-        try{
-            val imgpath = cacheDir.toString()+"/"+"osz.png${userInfo.users_id}"
-            val bm: Bitmap = BitmapFactory.decodeFile(imgpath)
-            ivPic.setImageBitmap(bm)
-        } catch (e: Exception) {
-            Toast.makeText(applicationContext, "파일 로드 실패", Toast.LENGTH_SHORT).show()
-        }
+        dialogView.layoutParams = ViewGroup.LayoutParams(
+            resources.getDimensionPixelSize(R.dimen.profile_dialog_width),
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+
+        val userIdTextView: TextView = dialogView.findViewById(R.id.userIdTextView)
+        val mbtiTextView: TextView = dialogView.findViewById(R.id.mbtiTextView)
+        val hobbyTextView: TextView = dialogView.findViewById(R.id.hobbyTextView)
+        val regionTextView: TextView = dialogView.findViewById(R.id.regionTextView)
+
+        // 설정된 데이터로 TextView 업데이트
+        userIdTextView.text = "ID: ${userInfo.users_id}"
+        mbtiTextView.text = "MBTI: ${userInfo.users_mbti}"
+        hobbyTextView.text = "Hobby: ${userInfo.users_hobby}"
+        regionTextView.text = "Region: ${userInfo.users_region}"
+
+        // 이미지 로딩 부분은 여기에 추가하시면 됩니다.
+
         val dialog = AlertDialog.Builder(this)
             .setTitle("사용자 정보")
             .setView(dialogView)
-            .setMessage("ID: ${userInfo.users_id}\nPW: ${userInfo.users_pw}\nUID: ${userInfo.UID}\nMBTI: ${userInfo.users_mbti}\nHOBBY: ${userInfo.users_hobby}\nREGION: ${userInfo.users_region}")
             .setPositiveButton("확인", null)
+            .setNegativeButton("내 정보 수정") { _, _ ->
+                showEditDialog(userInfo)
+            }
             .create()
 
         dialog.show()
     }
+
+    private fun showEditDialog(userInfo: User) {
+        val editView: View = View.inflate(this, R.layout.edit_user_info, null)
+        val etNewPassword: EditText = editView.findViewById(R.id.etNewPassword)
+        val mbtiSpinner: Spinner = editView.findViewById(R.id.editMbtiSpinner)
+        val hobbySpinner: Spinner = editView.findViewById(R.id.editHobbySpinner)
+        val regionSpinner: Spinner = editView.findViewById(R.id.editRegionSpinner)
+
+        // Set up spinners with options
+        val mbtiAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mbtiOptions)
+        mbtiAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        mbtiSpinner.adapter = mbtiAdapter
+
+        val hobbyAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, hobbyOptions)
+        hobbyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        hobbySpinner.adapter = hobbyAdapter
+
+        val regionAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, regionOptions)
+        regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        regionSpinner.adapter = regionAdapter
+
+        val editDialog = AlertDialog.Builder(this)
+            .setTitle("내 정보 수정")
+            .setView(editView)
+            .setPositiveButton("저장") { _, _ ->
+                val newPassword = etNewPassword.text.toString()
+                val newMbti = mbtiSpinner.selectedItem.toString()
+                val newHobby = hobbySpinner.selectedItem.toString()
+                val newRegion = regionSpinner.selectedItem.toString()
+
+                val newMbtiInt = convertMbtiStringToInt(newMbti)
+                val newHobbyInt = convertHobbyStringToInt(newHobby)
+                val newRegionInt = convertRegionStringToInt(newRegion)
+
+                // 서버에 정보를 전송하는 메소드 호출
+                editMyInfo(newPassword, newMbtiInt, newHobbyInt, newRegionInt)
+            }
+            .setNegativeButton("취소", null)
+            .create()
+
+        editDialog.show()
+    }
+
+    private fun editMyInfo(newPassword: String, newMbti: Int, newHobby: Int, newRegion: Int) {
+        val editModel = EditModel(newPassword, newMbti, newHobby, newRegion)
+
+        val call: Call<EditResult> = api.edit_my_info("Bearer $token", editModel)
+
+        call.enqueue(object : Callback<EditResult> {
+            override fun onResponse(call: Call<EditResult>, response: Response<EditResult>) {
+                if (response.isSuccessful) {
+                    val editResult: EditResult? = response.body()
+                    if (editResult != null) {
+                        // 성공적인 응답 처리
+                        Toast.makeText(applicationContext, "정보가 수정되었습니다.", Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        // 응답이 null인 경우 또는 필요한 정보가 없는 경우에 대한 처리
+                        Toast.makeText(applicationContext, "서버 응답이 올바르지 않습니다.", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                } else {
+                    // 서버 응답이 실패한 경우에 대한 처리
+                    Toast.makeText(applicationContext, "서버 응답 실패", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<EditResult>, t: Throwable) {
+                // 통신 실패 시에 대한 처리
+                Log.e("editMyInfo", "통신 실패: ${t.message}")
+                Toast.makeText(applicationContext, "통신 실패", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+
+
 
     private fun getMatchedUsers(selectedMbti: Int, selectedHobby: Int, selectedRegion: Int) {
         api.matchedUser(selectedMbti, selectedHobby, selectedRegion).enqueue(object : Callback<ArrayList<User>> {
@@ -150,7 +243,7 @@ class SecondActivity : AppCompatActivity() {
 
         // RecyclerView 설정
         val recyclerView = dialogView.findViewById<RecyclerView>(R.id.matchedUsersRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.layoutManager = LinearLayoutManager(this).also { it.orientation = LinearLayoutManager.HORIZONTAL  }
         val adapter = MatchedUsersAdapter(matchedUsers)
         recyclerView.adapter = adapter
 
