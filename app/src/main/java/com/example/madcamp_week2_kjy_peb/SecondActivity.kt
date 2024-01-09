@@ -48,7 +48,6 @@ class SecondActivity : AppCompatActivity() {
         }
 
 
-
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mbtiOptions)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.mbtiSpinner2.adapter = adapter
@@ -135,89 +134,19 @@ class SecondActivity : AppCompatActivity() {
             .setView(dialogView)
             .setPositiveButton("확인", null)
             .setNegativeButton("내 정보 수정") { _, _ ->
-                showEditDialog(userInfo)
+                showEditDialog()
             }
             .create()
 
         dialog.show()
     }
 
-    private fun showEditDialog(userInfo: User) {
-        val editView: View = View.inflate(this, R.layout.edit_user_info, null)
-        val etNewPassword: EditText = editView.findViewById(R.id.etNewPassword)
-        val mbtiSpinner: Spinner = editView.findViewById(R.id.editMbtiSpinner)
-        val hobbySpinner: Spinner = editView.findViewById(R.id.editHobbySpinner)
-        val regionSpinner: Spinner = editView.findViewById(R.id.editRegionSpinner)
 
-
-        // Set up spinners with options
-        val mbtiAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mbtiOptions)
-        mbtiAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mbtiSpinner.adapter = mbtiAdapter
-
-        val hobbyAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, hobbyOptions)
-        hobbyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        hobbySpinner.adapter = hobbyAdapter
-
-        val regionAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, regionOptions)
-        regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        regionSpinner.adapter = regionAdapter
-
-        val editDialog = AlertDialog.Builder(this)
-            .setTitle("내 정보 수정")
-            .setView(editView)
-            .setPositiveButton("저장") { _, _ ->
-                val newPassword = etNewPassword.text.toString()
-                val newMbti = mbtiSpinner.selectedItem.toString()
-                val newHobby = hobbySpinner.selectedItem.toString()
-                val newRegion = regionSpinner.selectedItem.toString()
-
-                val newMbtiInt = convertMbtiStringToInt(newMbti)
-                val newHobbyInt = convertHobbyStringToInt(newHobby)
-                val newRegionInt = convertRegionStringToInt(newRegion)
-
-                // 서버에 정보를 전송하는 메소드 호출
-                editMyInfo(newPassword, newMbtiInt, newHobbyInt, newRegionInt)
-            }
-            .setNegativeButton("취소", null)
-            .create()
-
-        editDialog.show()
+    private fun showEditDialog() {
+        val intent = Intent(this@SecondActivity, EditUserInfoActivity::class.java)
+        intent.putExtra("token", token)
+        startActivity(intent)
     }
-
-
-    private fun editMyInfo(newPassword: String, newMbti: Int, newHobby: Int, newRegion: Int) {
-        val editModel = EditModel(newPassword, newMbti, newHobby, newRegion)
-
-        val call: Call<EditResult> = api.edit_my_info("Bearer $token", editModel)
-
-        call.enqueue(object : Callback<EditResult> {
-            override fun onResponse(call: Call<EditResult>, response: Response<EditResult>) {
-                if (response.isSuccessful) {
-                    val editResult: EditResult? = response.body()
-                    if (editResult != null) {
-                        // 성공적인 응답 처리
-                        Toast.makeText(applicationContext, "정보가 수정되었습니다.", Toast.LENGTH_SHORT)
-                            .show()
-                    } else {
-                        // 응답이 null인 경우 또는 필요한 정보가 없는 경우에 대한 처리
-                        Toast.makeText(applicationContext, "서버 응답이 올바르지 않습니다.", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                } else {
-                    // 서버 응답이 실패한 경우에 대한 처리
-                    Toast.makeText(applicationContext, "서버 응답 실패", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<EditResult>, t: Throwable) {
-                // 통신 실패 시에 대한 처리
-                Log.e("editMyInfo", "통신 실패: ${t.message}")
-                Toast.makeText(applicationContext, "통신 실패", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
 
 
 

@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const http = require('http');
 const socketIO = require('socket.io');
+const mongoose = require('mongoose');
 const path = require('path');
 
 const app = express();
@@ -56,7 +57,7 @@ console.log('Random Secret Key:', secretKey);
 
 const { OAuth2Client } = require('google-auth-library');
 const CLIENT_ID = '648978352693-anm2jkrauoa94q7vp7h338mdcm97vp7s.apps.googleusercontent.com';
-const client = new OAuth2Client(CLIENT_ID);
+const client2 = new OAuth2Client(CLIENT_ID);
 
 
 // 토큰 검증 미들웨어
@@ -294,7 +295,7 @@ app.post('/google_login', (req, res) => {
   // 예시: 토큰 검증이 성공하면 유저 정보를 응답으로 보냄
 
   // Verify Google ID Token
-  client.verifyIdToken({
+  clien2.verifyIdToken({
       idToken: idToken,
       audience: CLIENT_ID
   }).then(ticket => {
@@ -316,6 +317,26 @@ const server = http.createServer(app);
 const io = socketIO(server);
 console.log("outside io");
 
+// MongoDB에 연결
+mongoose.connect('mongodb://localhost:27017/chatDB', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+// 연결된지 확인하는 이벤트 리스너
+mongoose.connection.once('open', () => {
+  console.log('Connected to MongoDB');
+});
+
+// 채팅 모델 정의
+const Chat = mongoose.model('Chat', {
+  name: String,
+  script: String,
+  profile_image: String,
+  date_time: String,
+  roomName: String,
+});
+
 io.on('connection',  function(socket) {
     // 소켓 연결 이벤트 처리
     console.log('User Connection');
@@ -328,9 +349,21 @@ io.on('connection',  function(socket) {
         io.emit('connect user', user);
     });
 
-    socket.on('chat message', function (msg) {
+    socket.on('chat message', async function (msg) {
         console.log("Message " + msg['message']);
         console.log("보내는 아이디 : ", msg['rommName']);
+
+            // MongoDB에 채팅 내용 저장
+    const chat = new Chat({
+      name: msg['name'],
+      script: msg['script'],
+      profile_image: msg['profile_image'],
+      date_time: msg['date_time'],
+      roomName: msg['roomName'],
+    });
+
+    await chat.save();
+
         io.to(msg['roomName']).emit('chat message', msg);
     });
 });
