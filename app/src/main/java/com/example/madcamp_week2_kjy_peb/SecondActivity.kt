@@ -44,6 +44,8 @@ class SecondActivity : AppCompatActivity() {
         }
         binding.chatting.setOnClickListener{
             val intent = Intent(this@SecondActivity, ChatRoomActivity::class.java)
+            intent.putExtra("token", token)
+            intent.putExtra("user_id", id)
             startActivity(intent)
         }
 
