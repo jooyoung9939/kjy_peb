@@ -83,24 +83,12 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"/>
 
-    <Spinner
-        android:id="@+id/regionSpinner2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/hobbySpinner2"
-        android:layout_marginTop="16dp"
-        android:hint="Select Region"
-        android:backgroundTint="#2196F3"
-        android:padding="12dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"/>
-
     <Button
         android:id="@+id/matchButton"
         style="@style/AppTheme.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/regionSpinner2"
+        android:layout_below="@id/hobbySpinner2"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
         android:text="친구 매칭"/>

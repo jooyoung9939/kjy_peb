@@ -3,10 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -20,6 +21,17 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".SplashActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name = "android.intent.action.MAIN"/>
+                <category android:name = "android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".GoogleMap"
+            android:exported="false" />
+        <activity
             android:name=".ChatRoomActivity"
             android:exported="false" />
         <activity
@@ -27,7 +39,7 @@
             android:exported="false" />
         <activity android:name=".SecondActivity" />
         <activity android:name=".AllUserActivity" />
-        <activity android:name=".EditUserInfoActivity"/>
+        <activity android:name=".EditUserInfoActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -37,6 +49,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBvhZpkfR9LEuQwpl_yoGlj0bnjW5OmEOo" />
     </application>
 
 </manifest>
