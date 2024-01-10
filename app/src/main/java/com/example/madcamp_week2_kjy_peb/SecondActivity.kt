@@ -62,6 +62,7 @@ class SecondActivity : AppCompatActivity() {
                         if (userInfo != null) {
                             // 사용자 정보를 받아와서 처리 (예: AlertDialog로 표시)
                             selectedRegionString = userInfo.users_region
+                            Log.d("whu", selectedRegionString)
                         } else {
                             Toast.makeText(applicationContext, "사용자 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
                         }
