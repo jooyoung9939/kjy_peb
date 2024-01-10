@@ -35,7 +35,6 @@ class ChatRoomActivity : AppCompatActivity() {
     private lateinit var chat_recyclerview: RecyclerView
     private lateinit var token: String
     private lateinit var room: String
-    private lateinit var participants: ArrayList<String>
 
     var users_id: String = ""
     val api = RetroInterface.create()
@@ -57,13 +56,7 @@ class ChatRoomActivity : AppCompatActivity() {
 
         token = intent.getStringExtra("token") ?: ""
         room = intent.getStringExtra("room") ?: ""
-        participants = intent.getStringArrayListExtra("participants") ?: arrayListOf()
 
-        if (participants != null) {
-            Log.d("participants", participants.toString())
-        } else {
-            Log.e("participants", "participants is null")
-        }
 
         Log.d("ChatRoomActivity", "onCreate: room - $room")
         api.getMyInfo("Bearer $token").enqueue(object : Callback<User> {
@@ -179,7 +172,7 @@ class ChatRoomActivity : AppCompatActivity() {
     fun sendMessage(){
         val now = System.currentTimeMillis()
         val date = Date(now)
-        val sdf = SimpleDateFormat("yyyy-MM-dd\nhh:mm:ss")
+        val sdf = SimpleDateFormat("MM-dd\nhh:mm:ss")
         val getTime = sdf.format(date)
         val message = chating_Text.text.toString().trim({it<=' '})
         if(TextUtils.isEmpty(message)){
