@@ -70,8 +70,8 @@ class SecondActivity : Fragment() {
         binding.hobbySpinner2.adapter = adapter1
 
         binding.matchButton.setOnClickListener {
-            lateinit var selectedRegionString: String
-            api.getMyInfo("Bearer $token").enqueue(object : Callback<User> {
+            var selectedRegionString: String = ""
+            api.getMyInfo("Bearer ${arguments?.getString(ARG_TOKEN)}").enqueue(object : Callback<User> {
                 override fun onResponse(call: Call<User>, response: Response<User>) {
                     if (response.isSuccessful) {
                         val userInfo = response.body()
@@ -80,10 +80,10 @@ class SecondActivity : Fragment() {
                             selectedRegionString = userInfo.users_region
                             Log.d("whu", selectedRegionString)
                         } else {
-                            Toast.makeText(applicationContext, "사용자 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "사용자 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Toast.makeText(applicationContext, "사용자 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "사용자 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
                     }
                 }
 
