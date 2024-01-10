@@ -1,17 +1,20 @@
 package com.example.madcamp_week2_kjy_peb
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import android.util.Log
-import android.view.View
-import android.widget.Toast
 
 class EditUserInfoActivity : AppCompatActivity() {
     private lateinit var token: String
@@ -20,12 +23,12 @@ class EditUserInfoActivity : AppCompatActivity() {
     private lateinit var etNewPassword: EditText
     private lateinit var mbtiSpinner: Spinner
     private lateinit var hobbySpinner: Spinner
-    private lateinit var regionSpinner: Spinner
     private lateinit var btnSave: Button
+    private lateinit var map: Button
 
+    private lateinit var Region: TextView
     private val mbtiOptions = arrayOf("mbti 선택", "ESTJ", "ESTP", "ESFJ", "ESFP", "ENTJ", "ENTP", "ENFJ", "ENFP", "ISTJ", "ISTP", "ISFJ", "ISFP", "INTJ", "INTP", "INFJ", "INFP")
     private val hobbyOptions = arrayOf("취미 선택", "게임", "독서", "댄스", "등산", "만화/애니메이션 감상", "미술/그림 그리기", "악기 연주", "음악 감상", "여행", "영화 감상", "요리", "보드 게임", "산책", "스포츠 관람", "프로그래밍/코딩", "헬스/운동")
-    private val regionOptions = arrayOf("지역 선택", "서울특별시", "인천광역시", "부산광역시", "대구광역시", "대전광역시", "광주광역시", "울산광역시", "경기도", "경상북도", "경상남도", "충청북도", "충청남도", "전라북도", "전라남도", "강원도", "제주특별자치도", "세종특별자치도")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,8 +39,14 @@ class EditUserInfoActivity : AppCompatActivity() {
         etNewPassword = findViewById(R.id.etNewPassword)
         mbtiSpinner = findViewById(R.id.editMbtiSpinner)
         hobbySpinner = findViewById(R.id.editHobbySpinner)
-        regionSpinner = findViewById(R.id.editRegionSpinner)
         btnSave = findViewById(R.id.btnSave)
+        Region = findViewById(R.id.region)
+        map = findViewById(R.id.map)
+
+        if(intent.hasExtra("address")){
+            Region.text = intent.getStringExtra("address")
+            map.visibility = View.INVISIBLE
+        }
 
         // Set up spinners with options
         val mbtiAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mbtiOptions)
@@ -48,30 +57,45 @@ class EditUserInfoActivity : AppCompatActivity() {
         hobbyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         hobbySpinner.adapter = hobbyAdapter
 
-        val regionAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, regionOptions)
-        regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        regionSpinner.adapter = regionAdapter
 
         btnSave.setOnClickListener {
             saveUserInfo()
         }
+        map.setOnClickListener{
+            val intent = Intent(this, GoogleMap::class.java)
+            intent.putExtra("prev", "EditUser")
+            intent.putExtra("token", token)
+            startActivityForResult(intent, 789)
+        }
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == 789 && resultCode == Activity.RESULT_OK) {
+            // GoogleMap 액티비티에서 반환된 주소 정보를 처리
+            val selectedAddress = data?.getStringExtra("address")
+            Region.text = selectedAddress
+            map.visibility = View.INVISIBLE
+        }
+    }
+
 
     private fun saveUserInfo() {
         val newPassword = etNewPassword.text.toString()
         val newMbti = mbtiSpinner.selectedItem.toString()
         val newHobby = hobbySpinner.selectedItem.toString()
-        val newRegion = regionSpinner.selectedItem.toString()
+        val newRegion = Region.text.toString()
 
         val newMbtiInt = convertMbtiStringToInt(newMbti)
         val newHobbyInt = convertHobbyStringToInt(newHobby)
-        val newRegionInt = convertRegionStringToInt(newRegion)
+
 
         // 서버에 정보를 전송하는 메소드 호출
-        editMyInfo(newPassword, newMbtiInt, newHobbyInt, newRegionInt)
+        editMyInfo(newPassword, newMbtiInt, newHobbyInt, newRegion)
     }
 
-    private fun editMyInfo(newPassword: String, newMbti: Int, newHobby: Int, newRegion: Int) {
+    private fun editMyInfo(newPassword: String, newMbti: Int, newHobby: Int, newRegion: String) {
         val editModel = EditModel(newPassword, newMbti, newHobby, newRegion)
 
         val call: Call<EditResult> = api.edit_my_info("Bearer $token", editModel)
@@ -147,30 +171,6 @@ class EditUserInfoActivity : AppCompatActivity() {
             "프로그래밍/코딩" -> 15
             "헬스/운동" -> 16
             else -> 17 // Default value or handle unknown hobby options
-        }
-    }
-
-    private fun convertRegionStringToInt(regionString: String): Int {
-        return when (regionString) {
-            "지역 선택" -> 18
-            "서울특별시" -> 1
-            "인천광역시" -> 2
-            "부산광역시" -> 3
-            "대구광역시" -> 4
-            "대전광역시" -> 5
-            "광주광역시" -> 6
-            "울산광역시" -> 7
-            "경기도" -> 8
-            "경상북도" -> 9
-            "경상남도" -> 10
-            "충청북도" -> 11
-            "충청남도" -> 12
-            "전라북도" -> 13
-            "전라남도" -> 14
-            "강원도" -> 15
-            "제주특별자치도" -> 16
-            "세종특별자치도" -> 17
-            else -> 18 // Default value or handle unknown region options
         }
     }
 }
