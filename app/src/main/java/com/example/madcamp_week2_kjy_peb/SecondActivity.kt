@@ -70,38 +70,36 @@ class SecondActivity : Fragment() {
         binding.hobbySpinner2.adapter = adapter1
 
         binding.matchButton.setOnClickListener {
-            var selectedRegionString: String = ""
-            api.getMyInfo("Bearer ${arguments?.getString(ARG_TOKEN)}").enqueue(object : Callback<User> {
-                override fun onResponse(call: Call<User>, response: Response<User>) {
-                    if (response.isSuccessful) {
-                        val userInfo = response.body()
-                        if (userInfo != null) {
-                            // 사용자 정보를 받아와서 처리 (예: AlertDialog로 표시)
-                            selectedRegionString = userInfo.users_region
-                            Log.d("whu", selectedRegionString)
-                        } else {
-                            Toast.makeText(requireContext(), "사용자 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
-                        }
-                    } else {
-                        Toast.makeText(requireContext(), "사용자 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                override fun onFailure(call: Call<User>, t: Throwable) {
-                    Log.d("testt", t.message.toString())
-                }
-            })
             binding.apply {
-                val selectedMbtiString = mbtiSpinner2.selectedItem.toString()
-                val selectedHobbyString = hobbySpinner2.selectedItem.toString()
+                api.getMyInfo("Bearer ${arguments?.getString(ARG_TOKEN)}").enqueue(object : Callback<User> {
+                    override fun onResponse(call: Call<User>, response: Response<User>) {
+                        if (response.isSuccessful) {
+                            val userInfo = response.body()
+                            if (userInfo != null) {
+                                // 사용자 정보를 받아와서 처리 (예: AlertDialog로 표시)
+                                val selectedRegionString = userInfo.users_region
+                                Log.d("whu", selectedRegionString)
+                                val selectedMbtiString = mbtiSpinner2.selectedItem.toString()
+                                val selectedHobbyString = hobbySpinner2.selectedItem.toString()
 
-                val selectedMbtiInt = convertMbtiStringToInt(selectedMbtiString)
-                val selectedHobbyInt = convertHobbyStringToInt(selectedHobbyString)
+                                val selectedMbtiInt = convertMbtiStringToInt(selectedMbtiString)
+                                val selectedHobbyInt = convertHobbyStringToInt(selectedHobbyString)
 
-                Log.e("여기서도?", "region string : $selectedRegionString")
-            // 서버로 MBTI 전송 및 매칭된 사용자 정보 가져오기
-            getMatchedUsers(selectedMbtiInt, selectedHobbyInt, selectedRegionString)
+                                Log.e("여기서도?", "region string : $selectedRegionString")
+                                // 서버로 MBTI 전송 및 매칭된 사용자 정보 가져오기
+                                getMatchedUsers(selectedMbtiInt, selectedHobbyInt, selectedRegionString)
+                            } else {
+                                Toast.makeText(requireContext(), "사용자 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            Toast.makeText(requireContext(), "사용자 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
 
+                    override fun onFailure(call: Call<User>, t: Throwable) {
+                        Log.d("testt", t.message.toString())
+                    }
+                })
             }
         }
     }

@@ -19,14 +19,14 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chat_recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="600dp"
+        android:layout_height="490dp"
         android:layout_below="@id/chat_You_Name"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/chating_Text"
-        android:layout_width="360dp"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/chat_recyclerview"
         android:hint="내용을 입력하세요"
