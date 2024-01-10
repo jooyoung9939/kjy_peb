@@ -1,5 +1,6 @@
 package com.example.madcamp_week2_kjy_peb
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -62,7 +63,9 @@ class ChatListFragment : Fragment() {
                     if (response.isSuccessful) {
                         val chats = response.body()
                         if (chats != null) {
-                            displayChats(chats)
+                            // 최신 메시지만 추출하여 표시
+                            val latestMessages = extractLatestMessages(chats)
+                            displayChats(latestMessages)
                         } else {
                             // 서버로부터 받은 채팅 데이터가 null인 경우 처리
                             Log.e("ChatListFragment", "Failed to get chat data from the server")
@@ -81,14 +84,33 @@ class ChatListFragment : Fragment() {
         }
     }
 
+    // 최신 메시지만 추출하는 메서드 추가
+    private fun extractLatestMessages(chats: List<ChatModel>): List<ChatModel> {
+        val latestMessagesMap = mutableMapOf<String, ChatModel>()
+
+        // 채팅방 별로 최신 메시지 추출
+        for (chat in chats) {
+            if (!latestMessagesMap.containsKey(chat.roomName) ||
+                chat.date_time > latestMessagesMap[chat.roomName]?.date_time ?: ""
+            ) {
+                latestMessagesMap[chat.roomName] = chat
+            }
+        }
+
+        // Map을 List로 변환하여 반환
+        return latestMessagesMap.values.toList()
+    }
+
     private fun displayChats(chats: List<ChatModel>) {
         val chatRecyclerView = requireView().findViewById<RecyclerView>(R.id.chatRecyclerView)
-        val adapter = ChatListAdapter(chats)
+        val token = arguments?.getString(ARG_TOKEN) ?: ""
+        val adapter = ChatListAdapter(chats, token)
         chatRecyclerView.adapter = adapter
     }
 
     // ChatListAdapter 클래스 추가
-    private inner class ChatListAdapter(private val chats: List<ChatModel>) : RecyclerView.Adapter<ChatListAdapter.ViewHolder>() {
+    private inner class ChatListAdapter(private val chats: List<ChatModel>, private val token: String) : RecyclerView.Adapter<ChatListAdapter.ViewHolder>() {
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chatlist, parent, false)
             return ViewHolder(view)
@@ -100,6 +122,15 @@ class ChatListFragment : Fragment() {
             holder.chatList_You_Name.text = chat.roomName
             holder.chatList_Text.text = chat.script
             holder.chatList_Time.text = chat.date_time
+
+            holder.itemView.setOnClickListener {
+                // 클릭된 채팅방의 정보를 전달하여 ChatRoomActivity를 시작
+                Log.d("whu", chat.roomName)
+                val intent = Intent(requireContext(), ChatRoomActivity::class.java)
+                intent.putExtra("room", chat.roomName)
+                intent.putExtra("token", token)
+                startActivity(intent)
+            }
         }
 
         override fun getItemCount(): Int = chats.size
