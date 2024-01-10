@@ -1,5 +1,7 @@
 package com.example.madcamp_week2_kjy_peb
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
@@ -24,11 +26,15 @@ class Register : AppCompatActivity() {
 
     private val mbtiOptions = arrayOf("mbti 선택", "ESTJ", "ESTP", "ESFJ", "ESFP", "ENTJ", "ENTP", "ENFJ", "ENFP", "ISTJ", "ISTP", "ISFJ", "ISFP", "INTJ", "INTP", "INFJ", "INFP")
     private val hobbyOptions = arrayOf("취미 선택", "게임", "독서", "댄스", "등산", "만화/애니메이션 감상", "미술/그림 그리기", "악기 연주", "음악 감상", "여행", "영화 감상", "요리", "보드 게임", "산책", "스포츠 관람", "프로그래밍/코딩", "헬스/운동")
-    private val regionOptions = arrayOf("지역 선택", "서울특별시", "인천광역시", "부산광역시", "대구광역시", "대전광역시", "광주광역시", "울산광역시", "경기도", "경상북도", "경상남도", "충청북도", "충청남도", "전라북도", "전라남도", "강원도", "제주특별자치도", "세종특별자치도")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        if(intent.hasExtra("address")){
+            binding.region.text = intent.getStringExtra("address")
+            binding.map.visibility = View.INVISIBLE
+        }
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mbtiOptions)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -38,12 +44,14 @@ class Register : AppCompatActivity() {
         adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.hobbySpinner.adapter = adapter1
 
-        val adapter2 = ArrayAdapter(this, android.R.layout.simple_spinner_item, regionOptions)
-        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.regionSpinner.adapter = adapter2
 
         binding.insert.setOnClickListener{
             getContent.launch("image/*")
+        }
+        binding.map.setOnClickListener{
+            val intent = Intent(this, GoogleMap::class.java)
+            intent.putExtra("prev", "Register")
+            startActivityForResult(intent, 813)
         }
         binding.registerButton.setOnClickListener{
             binding.apply {
@@ -51,7 +59,7 @@ class Register : AppCompatActivity() {
                 val pw = inputPw.text.toString()
                 val selectedMbtiString = mbtiSpinner.selectedItem.toString()
                 val selectedHobbyString = hobbySpinner.selectedItem.toString()
-                val selectedRegionString = regionSpinner.selectedItem.toString()
+                val selectedRegionString = binding.region.text.toString()
 
                 if(id == "" || pw == "") {
                     Toast.makeText(applicationContext, "입력하지 않은 정보가 있습니다.", Toast.LENGTH_SHORT).show()
@@ -60,9 +68,8 @@ class Register : AppCompatActivity() {
 
                 val selectedMbtiInt = convertMbtiStringToInt(selectedMbtiString)
                 val selectedHobbyInt = convertHobbyStringToInt(selectedHobbyString)
-                val selectedRegionInt = convertRegionStringToInt(selectedRegionString)
 
-                val newUser = RegisterModel(binding.inputID.text.toString(), binding.inputPw.text.toString(), selectedMbtiInt, selectedHobbyInt, selectedRegionInt)
+                val newUser = RegisterModel(binding.inputID.text.toString(), binding.inputPw.text.toString(), selectedMbtiInt, selectedHobbyInt, selectedRegionString)
                 api.register(newUser).enqueue(object: retrofit2.Callback<RegisterResult>{
                     override fun onResponse(call: Call<RegisterResult>, response: Response<RegisterResult>) {
                         val result = response.body()?.message ?: return
@@ -94,6 +101,17 @@ class Register : AppCompatActivity() {
 
         }
     }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == 813 && resultCode == Activity.RESULT_OK) {
+            // GoogleMap 액티비티에서 반환된 주소 정보를 처리
+            val selectedAddress = data?.getStringExtra("address")
+            binding.region.text = selectedAddress
+            binding.map.visibility = View.INVISIBLE
+        }
+    }
+
 
     private fun convertMbtiStringToInt(mbtiString: String): Int {
         return when (mbtiString) {
@@ -138,30 +156,6 @@ class Register : AppCompatActivity() {
             "프로그래밍/코딩" -> 15
             "헬스/운동" -> 16
             else -> 17 // Default value or handle unknown hobby options
-        }
-    }
-
-    private fun convertRegionStringToInt(regionString: String): Int {
-        return when (regionString) {
-            "지역 선택" -> 18
-            "서울특별시" -> 1
-            "인천광역시" -> 2
-            "부산광역시" -> 3
-            "대구광역시" -> 4
-            "대전광역시" -> 5
-            "광주광역시" -> 6
-            "울산광역시" -> 7
-            "경기도" -> 8
-            "경상북도" -> 9
-            "경상남도" -> 10
-            "충청북도" -> 11
-            "충청남도" -> 12
-            "전라북도" -> 13
-            "전라남도" -> 14
-            "강원도" -> 15
-            "제주특별자치도" -> 16
-            "세종특별자치도" -> 17
-            else -> 18 // Default value or handle unknown region options
         }
     }
 

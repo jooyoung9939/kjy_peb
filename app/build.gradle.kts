@@ -57,4 +57,7 @@ dependencies {
     implementation ("com.google.android.gms:play-services-auth:20.5.0")
     //Chattinh
     implementation("io.socket:socket.io-client:2.1.0")
+    //Google Maps
+    implementation("com.google.android.gms:play-services-maps:17.0.0")
+    implementation("com.google.android.gms:play-services-location:17.0.0")
 }
