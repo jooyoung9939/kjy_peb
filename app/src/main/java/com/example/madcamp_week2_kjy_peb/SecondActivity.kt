@@ -5,13 +5,14 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.madcamp_week2_kjy_peb.databinding.ActivitySecondBinding
@@ -19,37 +20,52 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class SecondActivity : AppCompatActivity() {
+class SecondActivity : Fragment() {
     private lateinit var binding: ActivitySecondBinding
-    private lateinit var token: String
-    val api = RetroInterface.create()
-    private lateinit var id: String
-
+    private val api = RetroInterface.create()
 
     private val mbtiOptions = arrayOf("mbti 선택", "ESTJ", "ESTP", "ESFJ", "ESFP", "ENTJ", "ENTP", "ENFJ", "ENFP", "ISTJ", "ISTP", "ISFJ", "ISFP", "INTJ", "INTP", "INFJ", "INFP")
     private val hobbyOptions = arrayOf("취미 선택", "게임", "독서", "댄스", "등산", "만화/애니메이션 감상", "미술/그림 그리기", "악기 연주", "음악 감상", "여행", "영화 감상", "요리", "보드 게임", "산책", "스포츠 관람", "프로그래밍/코딩", "헬스/운동")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivitySecondBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
-        val intent = intent
-        id = intent.getStringExtra("id")?: ""
 
-        token = intent.getStringExtra("token") ?: ""
-        binding.textView.text = "$id 님,"
+    companion object {
+        private const val ARG_ID  = "id"
+        private const val ARG_TOKEN  = "token"
+
+        // newInstance 메서드를 통해 매개변수 전달
+        fun newInstance(id: String, token: String): SecondActivity {
+            val fragment = SecondActivity()
+            val args = Bundle()
+            args.putString(ARG_ID, id)
+            args.putString(ARG_TOKEN , token)
+            fragment.arguments = args
+            return fragment
+        }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = ActivitySecondBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.textView.text = "${arguments?.getString(ARG_ID)} 님,"
 
         binding.myInfoButton.setOnClickListener {
             // 토큰을 이용하여 사용자 정보를 요청
             getUserInfo()
         }
 
-
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mbtiOptions)
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, mbtiOptions)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.mbtiSpinner2.adapter = adapter
 
-        val adapter1 = ArrayAdapter(this, android.R.layout.simple_spinner_item, hobbyOptions)
+        val adapter1 = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, hobbyOptions)
         adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.hobbySpinner2.adapter = adapter1
 
@@ -76,24 +92,22 @@ class SecondActivity : AppCompatActivity() {
                 }
             })
             binding.apply {
-
-            val selectedMbtiString = mbtiSpinner2.selectedItem.toString()
+                val selectedMbtiString = mbtiSpinner2.selectedItem.toString()
                 val selectedHobbyString = hobbySpinner2.selectedItem.toString()
 
-
-            val selectedMbtiInt = convertMbtiStringToInt(selectedMbtiString)
+                val selectedMbtiInt = convertMbtiStringToInt(selectedMbtiString)
                 val selectedHobbyInt = convertHobbyStringToInt(selectedHobbyString)
 
                 Log.e("여기서도?", "region string : $selectedRegionString")
             // 서버로 MBTI 전송 및 매칭된 사용자 정보 가져오기
             getMatchedUsers(selectedMbtiInt, selectedHobbyInt, selectedRegionString)
+
             }
         }
-
     }
 
     private fun getUserInfo() {
-        api.getMyInfo("Bearer $token").enqueue(object : Callback<User> {
+        api.getMyInfo("Bearer ${arguments?.getString(ARG_TOKEN)}").enqueue(object : Callback<User> {
             override fun onResponse(call: Call<User>, response: Response<User>) {
                 if (response.isSuccessful) {
                     val userInfo = response.body()
@@ -101,10 +115,10 @@ class SecondActivity : AppCompatActivity() {
                         // 사용자 정보를 받아와서 처리 (예: AlertDialog로 표시)
                         showUserInfoDialog(userInfo)
                     } else {
-                        Toast.makeText(applicationContext, "사용자 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "사용자 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    Toast.makeText(applicationContext, "사용자 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "사용자 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -115,14 +129,14 @@ class SecondActivity : AppCompatActivity() {
     }
 
     private fun showUserInfoDialog(userInfo: User) {
-        val dialogView: View = View.inflate(this, R.layout.profile_image, null)
+        val dialogView: View = View.inflate(requireContext(), R.layout.profile_image, null)
         val imaged: ImageView = dialogView.findViewById(R.id.imaged)
         try {
-            var img_path: String = getCacheDir().toString() + "/" + "osz.png"+userInfo.users_id // 내부 저장소에 저장되어 있는 이미지 경로
+            var img_path: String = requireContext().cacheDir.toString() + "/" + "osz.png" + userInfo.users_id // 내부 저장소에 저장되어 있는 이미지 경로
             var bm = BitmapFactory.decodeFile(img_path)
             imaged.setImageBitmap(bm) // 내부 저장소에 저장된 이미지를 이미지뷰에 셋
         } catch (e: java.lang.Exception) {
-            Toast.makeText(getApplicationContext(), "파일 로드 실패", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "파일 로드 실패", Toast.LENGTH_SHORT).show()
         }
         dialogView.layoutParams = ViewGroup.LayoutParams(
             resources.getDimensionPixelSize(R.dimen.profile_dialog_width),
@@ -140,9 +154,7 @@ class SecondActivity : AppCompatActivity() {
         hobbyTextView.text = "Hobby: ${userInfo.users_hobby}"
         regionTextView.text = "Region: ${userInfo.users_region}"
 
-        // 이미지 로딩 부분은 여기에 추가하시면 됩니다.
-
-        val dialog = AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("사용자 정보")
             .setView(dialogView)
             .setPositiveButton("확인", null)
@@ -154,17 +166,18 @@ class SecondActivity : AppCompatActivity() {
         dialog.show()
     }
 
-
     private fun showEditDialog() {
-        val intent = Intent(this@SecondActivity, EditUserInfoActivity::class.java)
-        intent.putExtra("token", token)
+        val intent = Intent(requireContext(), EditUserInfoActivity::class.java)
+        intent.putExtra("token", arguments?.getString(ARG_TOKEN))
         startActivity(intent)
     }
 
 
 
+
     private fun getMatchedUsers(selectedMbti: Int, selectedHobby: Int, selectedRegion: String) {
         Log.e("지역 정보 넘어왔는지", "selectedRegion = $selectedRegion")
+
         api.matchedUser(selectedMbti, selectedHobby, selectedRegion).enqueue(object : Callback<ArrayList<User>> {
             override fun onResponse(call: Call<ArrayList<User>>, response: Response<ArrayList<User>>) {
                 if (response.isSuccessful) {
@@ -173,10 +186,10 @@ class SecondActivity : AppCompatActivity() {
                         // 매칭된 사용자 정보를 다이얼로그로 표시
                         showMatchedUsersDialog(matchedUsers)
                     } else {
-                        Toast.makeText(applicationContext, "매칭된 사용자가 없습니다.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "매칭된 사용자가 없습니다.", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    Toast.makeText(applicationContext, "매칭된 사용자 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "매칭된 사용자 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -191,26 +204,37 @@ class SecondActivity : AppCompatActivity() {
 
         // RecyclerView 설정
         val recyclerView = dialogView.findViewById<RecyclerView>(R.id.matchedUsersRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this).also { it.orientation = LinearLayoutManager.HORIZONTAL  }
+        recyclerView.layoutManager = LinearLayoutManager(requireContext()).also { it.orientation = LinearLayoutManager.HORIZONTAL }
         val adapter = MatchedUsersAdapter(matchedUsers)
         adapter.setOnButtonClickListener(object : MatchedUsersAdapter.OnButtonClickListener {
             override fun onButtonClick(position: Int, userId: String) {
-                val intent = Intent(this@SecondActivity, ChatRoomActivity::class.java)
-                intent.putExtra("token", token)
+                val intent = Intent(requireContext(), ChatRoomActivity::class.java)
+                intent.putExtra("token", arguments?.getString(ARG_TOKEN))
                 var room: String
-                if(userId > id){
-                    room = userId+"_"+id
+                if (userId != null) {
+                    // userId가 null이 아닌 경우 compareTo를 사용하여 비교
+                    room = if (userId.compareTo(arguments?.getString(ARG_ID) ?: "") > 0) {
+                        "$userId" + "_${arguments?.getString(ARG_ID)}"
+                    } else {
+                        "${arguments?.getString(ARG_ID)}_$userId"
+                    }
                 } else {
-                    room = id+"_"+userId
+                    // userId가 null인 경우 처리
+                    room = "${arguments?.getString(ARG_ID)}_${userId ?: ""}"
                 }
                 intent.putExtra("room", room)
                 Log.e("cjattasdf", "WJU - $room")
+
+                val participants = arrayListOf(userId, arguments?.getString(ARG_ID))
+                intent.putExtra("participants", participants)
+                Log.d("participants", participants.toString())
+
                 startActivity(intent)
             }
         })
         recyclerView.adapter = adapter
         // 다이얼로그 생성
-        val dialog = AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("매칭된 사용자 목록")
             .setView(dialogView)
             .setPositiveButton("확인", null)
@@ -264,4 +288,5 @@ class SecondActivity : AppCompatActivity() {
             else -> 17 // Default value or handle unknown hobby options
         }
     }
+
 }

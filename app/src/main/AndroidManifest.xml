@@ -37,11 +37,11 @@
         <activity
             android:name=".Register"
             android:exported="false" />
-        <activity android:name=".SecondActivity" />
+        <activity android:name=".MainActivity"/>
         <activity android:name=".AllUserActivity" />
         <activity android:name=".EditUserInfoActivity" />
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

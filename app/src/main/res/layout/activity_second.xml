@@ -93,14 +93,5 @@
         android:layout_marginTop="16dp"
         android:text="친구 매칭"/>
 
-    <Button
-        android:id="@+id/chatting"
-        style="@style/AppTheme.Button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/matchButton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:text="체팅하기"/>
 
 </RelativeLayout>

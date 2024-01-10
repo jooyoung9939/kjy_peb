@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import retrofit2.Call
@@ -34,6 +35,8 @@ class ChatRoomActivity : AppCompatActivity() {
     private lateinit var chat_recyclerview: RecyclerView
     private lateinit var token: String
     private lateinit var room: String
+    private lateinit var participants: ArrayList<String>
+
     var users_id: String = ""
     val api = RetroInterface.create()
 
@@ -54,6 +57,14 @@ class ChatRoomActivity : AppCompatActivity() {
 
         token = intent.getStringExtra("token") ?: ""
         room = intent.getStringExtra("room") ?: ""
+        participants = intent.getStringArrayListExtra("participants") ?: arrayListOf()
+
+        if (participants != null) {
+            Log.d("participants", participants.toString())
+        } else {
+            Log.e("participants", "participants is null")
+        }
+
         Log.d("ChatRoomActivity", "onCreate: room - $room")
         api.getMyInfo("Bearer $token").enqueue(object : Callback<User> {
             override fun onResponse(call: Call<User>, response: Response<User>) {
@@ -129,14 +140,16 @@ class ChatRoomActivity : AppCompatActivity() {
             val script: String
             val profile_image: String
             val date_time: String
+            val roomName: String
             try{
                 Log.e("asdasd", data.toString())
                 name = data.getString("name")
                 script = data.getString("script")
                 profile_image = data.getString("profile_image")
                 date_time = data.getString("date_time")
+                roomName = data.getString("roomName")
                 Log.e("ReceivedMessage", "Name: $name, Script: $script, Profile Image: $profile_image, Date Time: $date_time")
-                val format = ChatModel(name, script, profile_image, date_time)
+                val format = ChatModel(name, script, profile_image, date_time, roomName)
                 mAdapter.addItem(format)
                 mAdapter.notifyDataSetChanged()
                 Log.e("new me", name)
@@ -166,7 +179,7 @@ class ChatRoomActivity : AppCompatActivity() {
     fun sendMessage(){
         val now = System.currentTimeMillis()
         val date = Date(now)
-        val sdf = SimpleDateFormat("yyyy-MM-dd")
+        val sdf = SimpleDateFormat("yyyy-MM-dd\nhh:mm:ss")
         val getTime = sdf.format(date)
         val message = chating_Text.text.toString().trim({it<=' '})
         if(TextUtils.isEmpty(message)){

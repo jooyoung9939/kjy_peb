@@ -105,7 +105,7 @@ app.get('/', (req, res) => {
     connection.query('select * from users where users_id=?',[id],(err,data)=>{
       if(data.length == 0){
           console.log('회원가입 성공');
-          connection.query('insert into users(users_id, users_pw, users_mbti_id, users_hobby_id, users_region_id) values(?,?,?,?,?)',[id,pw,mbti,hobby,region]);
+          connection.query('insert into users(users_id, users_pw, users_mbti_id, users_hobby_id, users_region) values(?,?,?,?,?)',[id,pw,mbti,hobby,region]);
           res.status(200).json(
             {
               "message" : true
@@ -184,14 +184,13 @@ app.get('/users_info', (req, res) => {
             u.users_id,
             m.mbtis_name AS users_mbti,
             h.hobbies_name AS users_hobby,
-            r.regions_name AS users_region
+            u.users_region
         FROM
             users u
             LEFT JOIN mbtis m ON u.users_mbti_id = m.MID
             LEFT JOIN hobbies h ON u.users_hobby_id = h.HID
-            LEFT JOIN regions r ON u.users_region_id = r.RID
         WHERE
-            u.users_mbti_id = ? or u.users_hobby_id = ? or u.users_region_id = ?
+            u.users_mbti_id = ? or u.users_hobby_id = ? or u.users_region = ?
     `;
 
     connection.query(query, [mbti, hobby, region], (error, rows) => {
@@ -215,7 +214,7 @@ app.post('/edit_my_info', authenticateToken, (req, res) => {
   // UPDATE 쿼리를 사용하여 사용자 정보를 업데이트하는 로직을 추가해야 합니다.
   // 여기서는 가정상의 코드입니다.
 
-  connection.query('UPDATE users SET users_pw=?, users_mbti_id=?, users_hobby_id=?, users_region_id=? WHERE users_id=?', [newPassword, newMbti, newHobby, newRegion, userId], (err, data) => {
+  connection.query('UPDATE users SET users_pw=?, users_mbti_id=?, users_hobby_id=?, users_region=? WHERE users_id=?', [newPassword, newMbti, newHobby, newRegion, userId], (err, data) => {
       if (!err) {
           console.log('사용자 정보 업데이트 성공');
           res.status(200).json({
@@ -245,12 +244,11 @@ app.post('/edit_my_info', authenticateToken, (req, res) => {
             u.users_pw,
             m.mbtis_name AS users_mbti,
             h.hobbies_name AS users_hobby,
-            r.regions_name AS users_region
+            u.users_region
         FROM
             users u
             LEFT JOIN mbtis m ON u.users_mbti_id = m.MID
             LEFT JOIN hobbies h ON u.users_hobby_id = h.HID
-            LEFT JOIN regions r ON u.users_region_id = r.RID
         WHERE
             u.users_id = ?
     `;
@@ -367,6 +365,20 @@ io.on('connection',  function(socket) {
         io.to(msg['roomName']).emit('chat message', msg);
     });
 });
+
+app.get('/chats', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  console.log(userId)
+
+  try {
+    const chatsCursor = Chat.find({ roomName: { $regex: userId } }).sort({ date_time: -1 });
+    const chats = await chatsCursor.exec();
+    res.json(chats);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}); 
 
 server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
