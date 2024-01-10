@@ -44,7 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/inputPw"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="12dp"
         android:text="Login"
         android:transitionName="loginButtonTransition"/>
 
@@ -58,23 +58,13 @@
         android:text="Register"
         android:transitionName="registerButtonTransition"/>
 
-    <Button
-        android:id="@+id/allUserButton"
-        style="@style/AppTheme.Button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/registerButton"
-        android:layout_marginTop="16dp"
-        android:text="All Users"
-        android:transitionName="allUsersButtonTransition"/>
-
     <!-- Google Sign-In Button -->
     <com.google.android.gms.common.SignInButton
         android:id="@+id/googleSignInButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/allUserButton"
-        android:layout_marginTop="16dp"
+        android:layout_below="@id/registerButton"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"/>
 
 </RelativeLayout>

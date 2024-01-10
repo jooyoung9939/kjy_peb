@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
-import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import retrofit2.Call
@@ -56,6 +55,7 @@ class ChatRoomActivity : AppCompatActivity() {
 
         token = intent.getStringExtra("token") ?: ""
         room = intent.getStringExtra("room") ?: ""
+        val parts = room.split("_")
 
 
         Log.d("ChatRoomActivity", "onCreate: room - $room")
@@ -66,6 +66,13 @@ class ChatRoomActivity : AppCompatActivity() {
                     if (userInfo != null) {
                         users_id = userInfo.users_id
                         mAdapter.setUserId(users_id)
+                        if(parts[0] == users_id){
+                            val k = findViewById<TextView>(R.id.chat_You_Name)
+                            k.text = parts[1]
+                        } else {
+                            val k = findViewById<TextView>(R.id.chat_You_Name)
+                            k.text = parts[0]
+                        }
                         mAdapter.notifyDataSetChanged()
                     } else {
                         Toast.makeText(applicationContext, "사용자 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()

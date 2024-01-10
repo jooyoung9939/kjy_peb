@@ -1,10 +1,10 @@
 package com.example.madcamp_week2_kjy_peb
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.example.madcamp_week2_kjy_peb.databinding.ActivityLoginBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -73,10 +73,6 @@ class LoginActivity : AppCompatActivity() {
                 }
             })
 
-        }
-        binding.allUserButton.setOnClickListener {
-            val intent = Intent(this@LoginActivity, AllUserActivity::class.java)
-            startActivity(intent)
         }
 
         // 구글 로그인 옵션 설정
