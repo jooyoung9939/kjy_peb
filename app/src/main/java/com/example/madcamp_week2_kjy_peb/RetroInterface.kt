@@ -15,6 +15,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface RetroInterface{
@@ -41,12 +42,18 @@ interface RetroInterface{
     @GET("/my_info")
     fun getMyInfo(@Header("Authorization") token: String): Call<User>
 
+    @GET("/chats")
+    fun getChats(@Header("Authorization") token: String): Call<List<ChatModel>>
+
+
     @POST("/edit_my_info")
     @Headers("accept: application/json", "content-type: application/json")
     fun edit_my_info(
         @Header("Authorization") token: String,
         @Body jsonparams: EditModel
     ): Call<EditResult>
+
+
 
     @POST("/google_login")
     @Headers("accept: application/json",
