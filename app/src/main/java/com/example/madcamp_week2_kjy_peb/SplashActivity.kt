@@ -22,7 +22,7 @@ class SplashActivity : AppCompatActivity() {
         rotationAnimator.start()
 
         Handler().postDelayed(Runnable {
-            val i = Intent(this@SplashActivity, MainActivity::class.java)
+            val i = Intent(this@SplashActivity, LoginActivity::class.java)
             startActivity(i)
             finish()
         }, 3000)
