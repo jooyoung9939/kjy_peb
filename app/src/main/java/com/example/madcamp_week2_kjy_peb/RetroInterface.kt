@@ -9,8 +9,6 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Headers
@@ -36,7 +34,7 @@ interface RetroInterface{
     @GET("/matched_users_info")
     fun matchedUser(@Query("mbti") mbti: Int,
                     @Query("hobby") hobby: Int,
-                    @Query("region") region: Int): Call<ArrayList<User>>
+                    @Query("region") region: String): Call<ArrayList<User>>
 
     @GET("/my_info")
     fun getMyInfo(@Header("Authorization") token: String): Call<User>

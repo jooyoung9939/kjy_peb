@@ -70,18 +70,27 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"/>
 
-    <Spinner
-        android:id="@+id/regionSpinner"
-        android:layout_width="match_parent"
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id = "@+id/region"
         android:layout_below="@id/hobbySpinner"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="28dp"
+        android:hint = "지역을 설정하세요"
+        android:layout_alignLeft="@+id/hobbySpinner"
+        android:textSize="16sp"
+        android:layout_marginLeft="8dp"
+        />
+
+    <Button
+        android:id="@+id/map"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/hobbySpinner"
+        android:layout_alignEnd="@+id/hobbySpinner"
         android:layout_marginTop="16dp"
-        android:hint="Select Region"
-        android:backgroundTint="#2196F3"
-        android:padding="12dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"/>
+        android:text="지역 추가" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardview"
@@ -118,7 +127,7 @@
         style="@style/AppTheme.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/regionSpinner"
+        android:layout_below="@id/map"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="24dp"
         android:text="Register"

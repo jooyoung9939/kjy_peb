@@ -8,9 +8,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -30,7 +28,6 @@ class SecondActivity : AppCompatActivity() {
 
     private val mbtiOptions = arrayOf("mbti 선택", "ESTJ", "ESTP", "ESFJ", "ESFP", "ENTJ", "ENTP", "ENFJ", "ENFP", "ISTJ", "ISTP", "ISFJ", "ISFP", "INTJ", "INTP", "INFJ", "INFP")
     private val hobbyOptions = arrayOf("취미 선택", "게임", "독서", "댄스", "등산", "만화/애니메이션 감상", "미술/그림 그리기", "악기 연주", "음악 감상", "여행", "영화 감상", "요리", "보드 게임", "산책", "스포츠 관람", "프로그래밍/코딩", "헬스/운동")
-    private val regionOptions = arrayOf("지역 선택", "서울특별시", "인천광역시", "부산광역시", "대구광역시", "대전광역시", "광주광역시", "울산광역시", "경기도", "경상북도", "경상남도", "충청북도", "충청남도", "전라북도", "전라남도", "강원도", "제주특별자치도", "세종특별자치도")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySecondBinding.inflate(layoutInflater)
@@ -56,24 +53,40 @@ class SecondActivity : AppCompatActivity() {
         adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.hobbySpinner2.adapter = adapter1
 
-        val adapter2 = ArrayAdapter(this, android.R.layout.simple_spinner_item, regionOptions)
-        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.regionSpinner2.adapter = adapter2
-
         binding.matchButton.setOnClickListener {
+            lateinit var selectedRegionString: String
+            api.getMyInfo("Bearer $token").enqueue(object : Callback<User> {
+                override fun onResponse(call: Call<User>, response: Response<User>) {
+                    if (response.isSuccessful) {
+                        val userInfo = response.body()
+                        if (userInfo != null) {
+                            // 사용자 정보를 받아와서 처리 (예: AlertDialog로 표시)
+                            selectedRegionString = userInfo.users_region
+                            Log.e("여기선 돼야지", "region string : $selectedRegionString")
+                        } else {
+                            Toast.makeText(applicationContext, "사용자 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(applicationContext, "사용자 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<User>, t: Throwable) {
+                    Log.d("testt", t.message.toString())
+                }
+            })
             binding.apply {
 
             val selectedMbtiString = mbtiSpinner2.selectedItem.toString()
                 val selectedHobbyString = hobbySpinner2.selectedItem.toString()
-                val selectedRegionString = regionSpinner2.selectedItem.toString()
 
 
             val selectedMbtiInt = convertMbtiStringToInt(selectedMbtiString)
                 val selectedHobbyInt = convertHobbyStringToInt(selectedHobbyString)
-                val selectedRegionInt = convertRegionStringToInt(selectedRegionString)
 
+                Log.e("여기서도?", "region string : $selectedRegionString")
             // 서버로 MBTI 전송 및 매칭된 사용자 정보 가져오기
-            getMatchedUsers(selectedMbtiInt, selectedHobbyInt, selectedRegionInt)
+            getMatchedUsers(selectedMbtiInt, selectedHobbyInt, selectedRegionString)
             }
         }
 
@@ -150,7 +163,8 @@ class SecondActivity : AppCompatActivity() {
 
 
 
-    private fun getMatchedUsers(selectedMbti: Int, selectedHobby: Int, selectedRegion: Int) {
+    private fun getMatchedUsers(selectedMbti: Int, selectedHobby: Int, selectedRegion: String) {
+        Log.e("지역 정보 넘어왔는지", "selectedRegion = $selectedRegion")
         api.matchedUser(selectedMbti, selectedHobby, selectedRegion).enqueue(object : Callback<ArrayList<User>> {
             override fun onResponse(call: Call<ArrayList<User>>, response: Response<ArrayList<User>>) {
                 if (response.isSuccessful) {
@@ -248,30 +262,6 @@ class SecondActivity : AppCompatActivity() {
             "프로그래밍/코딩" -> 15
             "헬스/운동" -> 16
             else -> 17 // Default value or handle unknown hobby options
-        }
-    }
-
-    private fun convertRegionStringToInt(regionString: String): Int {
-        return when (regionString) {
-            "지역 선택" -> 18
-            "서울특별시" -> 1
-            "인천광역시" -> 2
-            "부산광역시" -> 3
-            "대구광역시" -> 4
-            "대전광역시" -> 5
-            "광주광역시" -> 6
-            "울산광역시" -> 7
-            "경기도" -> 8
-            "경상북도" -> 9
-            "경상남도" -> 10
-            "충청북도" -> 11
-            "충청남도" -> 12
-            "전라북도" -> 13
-            "전라남도" -> 14
-            "강원도" -> 15
-            "제주특별자치도" -> 16
-            "세종특별자치도" -> 17
-            else -> 18 // Default value or handle unknown region options
         }
     }
 }

@@ -8,7 +8,7 @@ data class RegisterModel(
     var pw: String,
     var mbti: Int,
     var hobby: Int,
-    var region: Int
+    var region: String
 
 )
 
@@ -49,7 +49,7 @@ data class EditModel(
     val newPassword: String,
     val newMbti: Int,
     val newHobby: Int,
-    val newRegion: Int
+    val newRegion: String
 )
 
 data class EditResult(
